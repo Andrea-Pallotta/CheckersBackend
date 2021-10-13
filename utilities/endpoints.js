@@ -1,0 +1,6 @@
+const NEW_GLOBAL_CHAT_MESSAGE = 'NEW_GLOBAL_CHAT_MESSAGE';
+
+module.exports = {
+    GLOBAL_CHAT,
+    NEW_GLOBAL_CHAT_MESSAGE,
+}

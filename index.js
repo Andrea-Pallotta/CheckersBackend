@@ -4,6 +4,7 @@ const color = require('colors');
 const cors = require('cors');
 const config = require('./configs/configs')();
 const db = require('./utilities/mongoConnect');
+const { NEW_GLOBAL_CHAT_MESSAGE, GLOBAL_CHAT } = require('./utilities/endpoints');
 
 const app = express();
 app.use(cors());
@@ -18,15 +19,17 @@ const io = require('socket.io')(server, {
     },
 });
 
-let interval;
-
 io.on('connection', (socket) => {
-    console.log('new client connected');
-    socket.emit('connection', null);
+    console.log(`new client ${socket.id} connected`);
+
+    socket.join(GLOBAL_CHAT);
+
+    socket.on(NEW_GLOBAL_CHAT_MESSAGE, (data) => {
+        io.in(GLOBAL_CHAT).emit(NEW_GLOBAL_CHAT_MESSAGE, data);
+    });
 
     socket.on('disconnect', () => {
-        console.log('client disconnected');
-        clearInterval(interval);
+        socket.leave(GLOBAL_CHAT);
     });
 });
 
