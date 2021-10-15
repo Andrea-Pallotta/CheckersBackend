@@ -5,12 +5,7 @@ const cors = require("cors");
 const config = require("./configs/configs")();
 const db = require("./utilities/mongoConnect");
 const endpoints = require("./utilities/endpoints");
-const {
-  addUser,
-  removeUser,
-  getUsersInRoom,
-} = require("./utilities/chatHandler");
-const { getMessagesInRoom } = require("./utilities/messageStorage");
+var where = require("lodash.where");
 
 const app = express();
 app.use(cors());
@@ -25,32 +20,37 @@ const io = require("socket.io")(server, {
   },
 });
 
+const GLOBAL_CHANNEL = {
+  name: "Global Chat",
+  partecipants: 0,
+  id: 1,
+  sockets: [],
+};
+
 io.on("connection", (socket) => {
   console.log(`new client connected`);
-  const { roomId, name } = socket.handshake.query;
-  console.log(socket.handshake.query)
-  socket.join(roomId);
+  socket.emit("connection", null);
 
-  const user = addUser(socket.id, roomId, name);
-  io.in(roomId).emit(endpoints.USER_JOIN_CHAT_EVENT, user);
+  socket.on("global-chat-join", (user) => {
+    console.log("global chat join");
+    GLOBAL_CHANNEL.sockets.push({user, id: socket.id});
+    GLOBAL_CHANNEL.partecipants += 1;
+    io.emit("global-chat", GLOBAL_CHANNEL);
+  });
 
-  socket.on(endpoints.NEW_GLOBAL_CHAT_MESSAGE, (data) => {
-    io.in(roomId).emit(endpoints.NEW_GLOBAL_CHAT_MESSAGE, data);
+  socket.on("send-global-message", (message) => {
+    io.emit("global-message", message);
   });
 
   socket.on("disconnect", () => {
-    removeUser(socket.id);
-    io.in(roomId).emit(endpoints.USER_LEAVE_CHAT_EVENT, user);
-    socket.leave(roomId);
+      GLOBAL_CHANNEL.partecipants -= 1;
+      GLOBAL_CHANNEL.sockets = GLOBAL_CHANNEL.sockets.filter((s) => s.id != socket.id);
+      io.emit("global-chat", GLOBAL_CHANNEL);
   });
 });
 
-app.get("/rooms/:roomId/users", (req, res) => {
-  const users = getUsersInRoom(req.params.roomId);
-  return res.json({ users });
-});
-
-app.get("/rooms/:roomId/messages", (req, res) => {
-  const messages = getMessagesInRoom(req.params.roomId);
-  return res.json({ messages });
+app.get("/getChannels", (_, res) => {
+  res.json({
+    channels: GLOBAL_CHANNEL,
+  });
 });
