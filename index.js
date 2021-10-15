@@ -27,13 +27,10 @@ const GLOBAL_CHANNEL = {
 };
 
 io.on("connection", (socket) => {
-  console.log(`new client connected`);
   socket.emit("connection", null);
 
   socket.on("global-chat-join", (user) => {
-    console.log("global chat join");
     GLOBAL_CHANNEL.sockets.push({user, id: socket.id});
-    console.log('on global chat join', GLOBAL_CHANNEL);
     io.emit("global-chat", GLOBAL_CHANNEL);
   });
 
@@ -43,7 +40,6 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
       GLOBAL_CHANNEL.sockets = GLOBAL_CHANNEL.sockets.filter((s) => s.id != socket.id);
-      console.log('on disconnect', GLOBAL_CHANNEL.sockets);
       io.emit("global-chat", GLOBAL_CHANNEL);
       socket.removeAllListeners();
   });
