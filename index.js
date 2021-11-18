@@ -24,6 +24,8 @@ const io = require("socket.io")(server, {
 
 let gameRoomCount = 0;
 
+let CONN_SOCKETS = new Map();
+
 const GLOBAL_CHANNEL = {
   name: "Global Chat",
   id: 1,
@@ -49,20 +51,20 @@ const NEW_GAME_BOARD = [
 ];
 
 io.on("connection", (socket) => {
-  socket.emit("connection", null);
+  // socket.emit("connection", null);
 
-  socket.on("global-chat-join", () => {
-    try {
-      GLOBAL_CHANNEL.sockets.set(socket.id, 1);
-    } catch {
-      GLOBAL_CHANNEL.sockets.delete(socket.id);
-      socket.disconnect();
-    }
-    socket.join("global-room");
-    io.sockets
-      .in("global-room")
-      .emit("global-chat", serialize(GLOBAL_CHANNEL.sockets));
-  });
+  // socket.on("global-chat-join", (socket) => {
+  //   try {
+  //     GLOBAL_CHANNEL.sockets.set(CONN_SOCKETS.get(), 1);
+  //   } catch {
+  //     GLOBAL_CHANNEL.sockets.delete(socket.id);
+  //     socket.disconnect();
+  //   }
+  //   socket.join("global-room");
+  //   io.sockets
+  //     .in("global-room")
+  //     .emit("global-chat", serialize(GLOBAL_CHANNEL.sockets));
+  // });
 
   socket.on("send-global-message", (message) => {
     io.sockets.in("global-room").emit("global-message", message);

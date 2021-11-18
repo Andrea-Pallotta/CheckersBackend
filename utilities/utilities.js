@@ -1,5 +1,5 @@
-const addToGlobal = (map, id) => {
-  map.set(id, 1);
+const addToGlobal = (map, object) => {
+  map.set(object, 1);
 };
 
 const removeFromGlobal = (map, id) => {
