@@ -16,6 +16,16 @@ class Reserved {
     this.sockets.forEach((key, _) => {
       if (key === this.socket.id) {
         this.sockets.delete(key);
+        this.deleteGlobal();
+        return;
+      }
+    });
+  };
+
+  deleteGlobal = () => {
+    this.global.forEach((key, _) => {
+      if (key.id === this.socket.id) {
+        this.global.delete(key);
       }
     });
   };
@@ -45,8 +55,10 @@ class Reserved {
   };
 
   getUser = () => {
-    [...this.global.keys()].filter((key) => {
+    return [...this.global.keys()].filter((key) => {
       return key.id === this.socket.id;
     });
   };
 }
+
+module.exports = Reserved;

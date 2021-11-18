@@ -4,12 +4,30 @@ class Rooms {
     this.socket = socket;
   }
 
+  join = (room) => {
+    this.socket.join(`${room}`);
+  };
+
   leave = (room) => {
     this.socket.leave(`${room}`);
   };
 
-  join = (room) => {
-    this.socket.join(`${room}`);
+  leaveAndJoin = (leaveRoom, joinRoom) => {
+    this.leave(`${leaveRoom}`);
+    this.join(`${joinRoom}`);
+  };
+
+  socketJoin = (socket, room) => {
+    socket.join(`${room}`);
+  };
+
+  socketLeave = (socket, room) => {
+    socket.leave(`${room}`);
+  };
+
+  socketLeaveAndJoin = (socket, leaveRoom, joinRoom) => {
+    this.socketLeave(socket, `${leaveRoom}`);
+    this.socketJoin(socket, `${joinRoom}`);
   };
 
   getSockets = (room) => {

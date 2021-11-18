@@ -1,7 +1,10 @@
+const uuidv4 = require("uuid").v4;
+
 class User {
   constructor(username, id) {
     this.username = username;
     this.id = id;
+    this.uuid = this.uuid = uuidv4();
   }
 
   getUsername = () => {
@@ -20,3 +23,5 @@ class User {
     this.id = id;
   };
 }
+
+module.exports = User;
