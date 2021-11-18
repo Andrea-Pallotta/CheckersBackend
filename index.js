@@ -116,7 +116,3 @@ io.on("connection", (socket) => {
     socket.removeAllListeners();
   });
 });
-
-app.get("/getPlayers", (req, res) => {
-  let;
-});
