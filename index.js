@@ -1,8 +1,11 @@
 const express = require("express");
 const cors = require("cors");
 const config = require("./configs/configs")();
-const db = require("./utilities/mongoConnect");
-const endpoints = require("./utilities/endpoints");
+const db = require("./utilities/mongo.connect");
+const endpoints = require("./utilities/endpoint.utilities");
+const { serialize } = require("./utilities/utilities");
+const WaitQueue = require("wait-queue");
+const wq = new WaitQueue();
 
 const app = express();
 app.use(cors());
@@ -11,16 +14,20 @@ const server = app.listen(config.app.port, config.app.localhost, () => {
 });
 
 const io = require("socket.io")(server, {
+  "reconnection limit": 1000,
+  "max reconnection attempts": 20,
   cors: {
     origin: "*",
     methods: ["GET", "POST"],
   },
 });
 
+let gameRoomCount = 0;
+
 const GLOBAL_CHANNEL = {
   name: "Global Chat",
   id: 1,
-  sockets: [],
+  sockets: new Map(),
 };
 
 const QUEUE = {
@@ -29,53 +36,87 @@ const QUEUE = {
   sockets: [],
 };
 
+const GAMES = [];
+
+const NEW_GAME_BOARD = [
+  [0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0],
+];
+
 io.on("connection", (socket) => {
   socket.emit("connection", null);
 
-  socket.on("global-chat-join", (user) => {
-    const ip = socket.request.connection.remoteAddress;
-    if (checkIfAlreadyConnected(user, socket.id, ip)) {
-      removeFromGlobal(GLOBAL_CHANNEL);
+  socket.on("global-chat-join", () => {
+    try {
+      GLOBAL_CHANNEL.sockets.set(socket.id, 1);
+    } catch {
+      GLOBAL_CHANNEL.sockets.delete(socket.id);
       socket.disconnect();
-    } else {
-      addToGlobal(user, socket.id, ip);
-      io.emit("global-chat", GLOBAL_CHANNEL);
     }
+    socket.join("global-room");
+    io.sockets
+      .in("global-room")
+      .emit("global-chat", serialize(GLOBAL_CHANNEL.sockets));
   });
 
   socket.on("send-global-message", (message) => {
-    io.emit("global-message", message);
+    io.sockets.in("global-room").emit("global-message", message);
   });
 
-  socket.on("queue-join", (user) => {
-    console.log("user");
+  socket.on("queue-join", (username) => {
+    socket.join("queue-room");
+    if (wq.length === 0) {
+      wq.push({ id: socket.id, username });
+      console.log("queue was empty. Added to queue", wq);
+    } else {
+      console.log("player in queue found");
+      wq.shift().then((player) => {
+        socket.leave("global-room", "left global chat");
+        playerSocket = io.sockets.sockets.get(player.id);
+        playerSocket.leave("global-room", "left global chat");
+        socket.join(`game-room-${gameRoomCount}`);
+        playerSocket.join(`game-room-${gameRoomCount}`);
+
+        const initialGameState = {
+          board: NEW_GAME_BOARD,
+          player1: {
+            id: socket.id,
+            username,
+          },
+          player2: {
+            id: playerSocket.id,
+            username: player.username,
+          },
+          turn: 1,
+          roomId: gameRoomCount,
+        };
+
+        gameRoomCount += 1;
+
+        io.to(socket.id).emit("game-found", initialGameState);
+        io.to(playerSocket.id).emit("game-found", initialGameState);
+      });
+    }
+  });
+
+  socket.on("game-room-message", (message, roomId) => {
+    socket.broadcast.to(`game-room-${roomId}`).emit("game-message", message);
   });
 
   socket.on("disconnect", () => {
-    removeFromGlobal(socket.id);
-    io.emit("global-chat", GLOBAL_CHANNEL);
+    GLOBAL_CHANNEL.sockets.delete(socket.id);
+    io.sockets
+      .in("global-room")
+      .emit("global-chat", serialize(GLOBAL_CHANNEL.sockets));
     socket.removeAllListeners();
   });
 });
 
-app.get("/getChannels", (_, res) => {
-  res.json({
-    channels: GLOBAL_CHANNEL,
-  });
+app.get("/getPlayers", (req, res) => {
+  let;
 });
-
-const checkIfAlreadyConnected = (user, id, ip) => {
-  return GLOBAL_CHANNEL.sockets.some((s) => {
-    return s.id === id || s.ip === ip || s.user === user;
-  });
-};
-
-const addToGlobal = (user, id, ip) => {
-  GLOBAL_CHANNEL.sockets.push({ user, id, ip });
-};
-
-const removeFromGlobal = (id) => {
-  GLOBAL_CHANNEL.sockets.splice(
-    GLOBAL_CHANNEL.sockets.findIndex((element) => element.id === id)
-  );
-};
