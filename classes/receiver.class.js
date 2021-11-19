@@ -6,7 +6,7 @@ const Message = require("./message.class");
 const { INITIAL_GAME_STATE } = require("./constants.class");
 
 class Receiver extends Reserved {
-  constructor(io, socket, sockets, global, messages, queue, user, gameCount) {
+  constructor(io, socket, sockets, global, messages, queue, gameCount, user) {
     super(io, socket, sockets, global, messages, queue);
     this.sender = new Sender(
       this.io,
@@ -18,64 +18,55 @@ class Receiver extends Reserved {
     this.rooms = new Rooms(this.io, this.socket);
     this.user = user;
     this.gameCount = gameCount;
-
+    this.queue = queue;
     this.socket.on("disconnect", this.onDisconnect);
     this.socket.on("join-public-chat", () => this.joinChat());
     this.socket.on("public-message", (message) => this.publicMessage(message));
     this.socket.on("join-queue", this.joinQueue);
-    this.socket.on("game-message", (roomId, message) =>
-      this.gameMessage(roomId, message)
-    );
+    this.socket.on("game-message", (content) => {
+      this.gameMessage(content.message, content.roomId);
+    });
     this.socket.on("game-move", (state, players, turn, roomId) =>
       this.gameMove(state, players, turn, roomId)
     );
   }
 
   joinChat = () => {
-    try {
-      this.addUser();
-      this.rooms.join("public-chat");
-      this.sender.roomsNoSender(
-        "joined-public-chat",
-        serialize(this.global),
-        "public-chat-room"
-      );
-    } catch {
-      this.onError(this.user.username, "public-chat-room");
-    }
+    this.addUser(this.user);
+    this.rooms.join("public-chat");
+    this.sender.roomsNoSender(
+      "joined-public-chat",
+      serialize(this.global),
+      "public-chat"
+    );
   };
 
   publicMessage = (message) => {
-    if (this.user) {
-      this.sender.roomsNoSender(
-        "send-message",
-        new Message(user.username, message),
-        "public-chat-room"
-      );
-    } else {
-      this.onError(null, "public-chat-room");
-    }
+    this.sender.roomsNoSender(
+      "send-message",
+      new Message(this.user.username, message),
+      "public-chat"
+    );
   };
 
   joinQueue = () => {
-    if (queue.length === 0) {
-      queue.push(this.user);
+    if (this.queue.length === 0) {
+      this.queue.push(this.user);
     } else {
-      queue.shift().then((queuedUser) => {
+      this.queue.shift().then((queuedUser) => {
         this.rooms.join(`game-room-${this.gameCount}`);
-
         this.rooms.socketJoin(
           this.io.sockets.sockets.get(queuedUser.id),
           `game-room-${this.gameCount}`
         );
         this.sender.basic(
           "start-game",
-          INITIAL_GAME_STATE(this.user, queuedUser)
+          INITIAL_GAME_STATE(this.user, queuedUser, this.gameCount)
         );
         this.sender.private(
           queuedUser.id,
           "start-game",
-          INITIAL_GAME_STATE(this.user, queuedUser)
+          INITIAL_GAME_STATE(this.user, queuedUser, this.gameCount)
         );
         this.sender.roomsNoSender(
           "joined-public-chat",
@@ -87,10 +78,10 @@ class Receiver extends Reserved {
     }
   };
 
-  gameMessage = (roomId, message) => {
+  gameMessage = (message, roomId) => {
     this.sender.roomsNoSender(
       "send-game-message",
-      new Message(user.username, message),
+      new Message(this.user.username, message),
       `game-room-${roomId}`
     );
   };

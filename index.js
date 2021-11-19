@@ -4,11 +4,11 @@ const config = require("./configs/configs")();
 const db = require("./utilities/mongo.connect");
 const endpoints = require("./utilities/endpoint.utilities");
 const { createConnection } = require("./classes/connection.class");
-const Reserved = require("./classes/reserved.class");
-const Sender = require("./classes/sender.class");
 
 const app = express();
 app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 const server = app.listen(config.app.port, config.app.localhost, () => {
   console.log(`${config.app.localhost} running on port ${config.app.port}`);
 });

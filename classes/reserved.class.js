@@ -1,3 +1,5 @@
+const User = require("./user.class");
+
 class Reserved {
   constructor(io, socket, sockets, global, messages) {
     this.io = io;
@@ -34,8 +36,8 @@ class Reserved {
     this.sockets.set(this.socket.id, 1);
   };
 
-  addUser = (username) => {
-    this.global.set(new User(username, this.socket.id));
+  addUser = (user) => {
+    this.global.set(user);
   };
 
   removeFromGlobal = (username) => {

@@ -4,7 +4,7 @@ class User {
   constructor(username, id) {
     this.username = username;
     this.id = id;
-    this.uuid = this.uuid = uuidv4();
+    this.uuid = uuidv4();
   }
 
   getUsername = () => {
