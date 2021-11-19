@@ -97,11 +97,6 @@ class Receiver extends Reserved {
 
   onDisconnect() {
     this.disconnect();
-    this.sender.roomsNoSender(
-      "joined-public-chat",
-      serialize(this.global),
-      "public-chat"
-    );
   }
 }
 
