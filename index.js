@@ -32,8 +32,7 @@ io.use(async (socket, next) => {
   });
 
   try {
-    const payload = await verifier.verify(socket.handshake.auth.token.jwtToken);
-    console.log("token is valid. Payload:", payload);
+    await verifier.verify(socket.handshake.auth.token.jwtToken);
   } catch (err) {
     console.log("Token not valid:", err);
   }

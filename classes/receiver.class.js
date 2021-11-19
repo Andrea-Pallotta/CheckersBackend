@@ -39,7 +39,7 @@ class Receiver extends Reserved {
   joinChat() {
     this.addUser(this.user);
     this.rooms.join("public-chat");
-    this.sender.roomsNoSender(
+    this.sender.roomsAll(
       "joined-public-chat",
       serialize(this.global),
       "public-chat"
