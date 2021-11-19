@@ -7,7 +7,6 @@ const Constants = require("./constants.class");
 
 class Connection {
   constructor(io, socket, sockets, global, messages, queue, gameCount, user) {
-    this.rooms = new Rooms(this.io, this.socket);
     this.socket = socket;
     this.io = io;
     this.sockets = sockets;
@@ -17,6 +16,7 @@ class Connection {
     this.gameCount = gameCount;
     this.user = user;
 
+    this.rooms = new Rooms(this.io, this.socket);
     this.reserved = new Reserved(
       this.io,
       this.socket,
@@ -45,7 +45,6 @@ class Connection {
 
   setUser(username) {
     this.user = new User(username, this.socket.id);
-    console.log(this.user);
   }
 }
 

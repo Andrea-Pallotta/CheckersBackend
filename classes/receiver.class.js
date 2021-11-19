@@ -22,7 +22,7 @@ class Receiver extends Reserved {
     this.socket.on("disconnect", this.onDisconnect);
     this.socket.on("join-public-chat", () => this.joinChat());
     this.socket.on("public-message", (message) => this.publicMessage(message));
-    this.socket.on("join-queue", this.joinQueue);
+    this.socket.on("join-queue", () => this.joinQueue());
     this.socket.on("game-message", (content) =>
       this.gameMessage(content.message, content.roomId)
     );
@@ -64,15 +64,20 @@ class Receiver extends Reserved {
           this.io.sockets.sockets.get(queuedUser.id),
           `game-room-${this.gameCount}`
         );
-        this.sender.basic(
+        this.sender.roomsAll(
           "start-game",
-          INITIAL_GAME_STATE(this.user, queuedUser, this.gameCount)
+          INITIAL_GAME_STATE(this.user, queuedUser, this.gameCount),
+          `game-room-${this.gameCount}`
         );
-        this.sender.private(
-          queuedUser.id,
-          "start-game",
-          INITIAL_GAME_STATE(this.user, queuedUser, this.gameCount)
-        );
+        // this.sender.basic(
+        //   "start-game",
+        //   INITIAL_GAME_STATE(this.user, queuedUser, this.gameCount)
+        // );
+        // this.sender.private(
+        //   queuedUser.id,
+        //   "start-game",
+        //   INITIAL_GAME_STATE(this.user, queuedUser, this.gameCount)
+        // );
         this.sender.roomsNoSender(
           "joined-public-chat",
           serialize(this.global),
