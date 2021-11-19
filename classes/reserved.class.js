@@ -1,5 +1,4 @@
-const User = require("./user.class");
-
+/* eslint-disable no-unused-vars */
 class Reserved {
   constructor(io, socket, sockets, global, messages) {
     this.io = io;
@@ -9,12 +8,12 @@ class Reserved {
     this.messages = messages;
   }
 
-  disconnect = () => {
+  disconnect() {
     this.socket.disconnect();
     this.deleteSocket();
-  };
+  }
 
-  deleteSocket = () => {
+  deleteSocket() {
     this.sockets.forEach((key, _) => {
       if (key === this.socket.id) {
         this.sockets.delete(key);
@@ -22,45 +21,45 @@ class Reserved {
         return;
       }
     });
-  };
+  }
 
-  deleteGlobal = () => {
+  deleteGlobal() {
     this.global.forEach((key, _) => {
       if (key.id === this.socket.id) {
         this.global.delete(key);
       }
     });
-  };
+  }
 
-  addSocket = () => {
+  addSocket() {
     this.sockets.set(this.socket.id, 1);
-  };
+  }
 
-  addUser = (user) => {
+  addUser(user) {
     this.global.set(user);
-  };
+  }
 
-  removeFromGlobal = (username) => {
+  removeFromGlobal(username) {
     this.global.forEach((user, _) => {
       if (user.username === username && user.id === this.socket.id) {
         this.global.delete(user);
       }
     });
-  };
+  }
 
-  onError = (username, room) => {
+  onError(username, room) {
     if (username) {
       this.removeFromGlobal(username);
     }
     this.rooms.leave(room || "public-chat-room");
     this.disconnect();
-  };
+  }
 
-  getUser = () => {
+  getUser() {
     return [...this.global.keys()].filter((key) => {
       return key.id === this.socket.id;
     });
-  };
+  }
 }
 
 module.exports = Reserved;

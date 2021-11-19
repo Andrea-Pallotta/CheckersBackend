@@ -43,10 +43,10 @@ class Connection {
     );
   }
 
-  setUser = (username) => {
+  setUser(username) {
     this.user = new User(username, this.socket.id);
     console.log(this.user);
-  };
+  }
 }
 
 const createConnection = (io) => {

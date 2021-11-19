@@ -23,15 +23,20 @@ class Receiver extends Reserved {
     this.socket.on("join-public-chat", () => this.joinChat());
     this.socket.on("public-message", (message) => this.publicMessage(message));
     this.socket.on("join-queue", this.joinQueue);
-    this.socket.on("game-message", (content) => {
-      this.gameMessage(content.message, content.roomId);
-    });
-    this.socket.on("game-move", (state, players, turn, roomId) =>
-      this.gameMove(state, players, turn, roomId)
+    this.socket.on("game-message", (content) =>
+      this.gameMessage(content.message, content.roomId)
+    );
+    this.socket.on("game-move", (content) =>
+      this.gameMove(
+        content.state,
+        content.players,
+        content.turn,
+        content.roomId
+      )
     );
   }
 
-  joinChat = () => {
+  joinChat() {
     this.addUser(this.user);
     this.rooms.join("public-chat");
     this.sender.roomsNoSender(
@@ -39,17 +44,17 @@ class Receiver extends Reserved {
       serialize(this.global),
       "public-chat"
     );
-  };
+  }
 
-  publicMessage = (message) => {
+  publicMessage(message) {
     this.sender.roomsNoSender(
       "send-message",
       new Message(this.user.username, message),
       "public-chat"
     );
-  };
+  }
 
-  joinQueue = () => {
+  joinQueue() {
     if (this.queue.length === 0) {
       this.queue.push(this.user);
     } else {
@@ -76,26 +81,28 @@ class Receiver extends Reserved {
         this.gameCount += 1;
       });
     }
-  };
+  }
 
-  gameMessage = (message, roomId) => {
+  gameMessage(message, roomId) {
     this.sender.roomsNoSender(
       "send-game-message",
       new Message(this.user.username, message),
       `game-room-${roomId}`
     );
-  };
+  }
 
-  gameMove = (state, players, turn, roomId) => {};
+  gameMove(state, players, turn, roomId) {
+    console.log(state, players, turn, roomId);
+  }
 
-  onDisconnect = () => {
+  onDisconnect() {
     this.disconnect();
     this.sender.roomsNoSender(
       "joined-public-chat",
       serialize(this.global),
       "public-chat"
     );
-  };
+  }
 }
 
 module.exports = Receiver;

@@ -1,8 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 const config = require("./configs/configs")();
-const db = require("./utilities/mongo.connect");
-const endpoints = require("./utilities/endpoint.utilities");
+// const db = require("./utilities/mongo.connect");
+// const endpoints = require("./utilities/endpoint.utilities");
 const { createConnection } = require("./classes/connection.class");
 
 const app = express();

@@ -7,21 +7,21 @@ class User {
     this.uuid = uuidv4();
   }
 
-  getUsername = () => {
+  getUsername() {
     return this.username;
-  };
+  }
 
-  getId = () => {
+  getId() {
     return this.id;
-  };
+  }
 
-  setUsername = (username) => {
+  setUsername(username) {
     this.username = username;
-  };
+  }
 
-  setId = (id) => {
+  setId(id) {
     this.id = id;
-  };
+  }
 }
 
 module.exports = User;
