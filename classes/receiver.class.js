@@ -47,7 +47,7 @@ class Receiver extends Reserved {
   }
 
   publicMessage(message) {
-    this.sender.roomsNoSender(
+    this.sender.roomsAll(
       "send-message",
       new Message(this.user.username, message),
       "public-chat"

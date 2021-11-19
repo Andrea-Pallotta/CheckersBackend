@@ -4,51 +4,51 @@ class Rooms {
     this.socket = socket;
   }
 
-  join = (room) => {
+  join(room) {
     this.socket.join(`${room}`);
-  };
+  }
 
-  leave = (room) => {
+  leave(room) {
     this.socket.leave(`${room}`);
-  };
+  }
 
-  leaveAndJoin = (leaveRoom, joinRoom) => {
+  leaveAndJoin(leaveRoom, joinRoom) {
     this.leave(`${leaveRoom}`);
     this.join(`${joinRoom}`);
-  };
+  }
 
-  socketJoin = (socket, room) => {
+  socketJoin(socket, room) {
     socket.join(`${room}`);
-  };
+  }
 
-  socketLeave = (socket, room) => {
+  socketLeave(socket, room) {
     socket.leave(`${room}`);
-  };
+  }
 
-  socketLeaveAndJoin = (socket, leaveRoom, joinRoom) => {
+  socketLeaveAndJoin(socket, leaveRoom, joinRoom) {
     this.socketLeave(socket, `${leaveRoom}`);
     this.socketJoin(socket, `${joinRoom}`);
-  };
+  }
 
-  getSockets = (room) => {
+  getSockets(room) {
     return this.io.in(`${room}`);
-  };
+  }
 
-  getRooms = () => {
+  getRooms() {
     return this.io.sockets.adapter.rooms;
-  };
+  }
 
-  createRoomAdapter = (name) => {
+  createRoomAdapter(name) {
     this.io.of("/").adapter.on(`${name}`, (room) => {
       console.log(`room ${room} created.`);
     });
-  };
+  }
 
-  joinRoomAdapter = (name) => {
+  joinRoomAdapter(name) {
     this.io.of("/").adapter.on(`${name}`, (room, id) => {
       console.log(`socket ${id} joined room ${room}`);
     });
-  };
+  }
 }
 
 module.exports = Rooms;

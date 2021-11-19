@@ -25,16 +25,15 @@ const io = require("socket.io")(server, {
 });
 
 io.use(async (socket, next) => {
-  const verifier = CognitoJwtVerifier.create({
-    userPoolId: socket.handshake.auth.token.payload.iss.split("/")[3],
-    tokenUse: "access",
-    clientId: socket.handshake.auth.token.payload.client_id,
-  });
-
   try {
+    const verifier = CognitoJwtVerifier.create({
+      userPoolId: socket.handshake.auth.token.payload.iss.split("/")[3],
+      tokenUse: "access",
+      clientId: socket.handshake.auth.token.payload.client_id,
+    });
     await verifier.verify(socket.handshake.auth.token.jwtToken);
   } catch (err) {
-    console.log("Token not valid:", err);
+    console.log("Validation failed");
   }
   next();
 });
