@@ -4,6 +4,7 @@ const config = require("./configs/configs")();
 // const db = require("./utilities/mongo.connect");
 // const endpoints = require("./utilities/endpoint.utilities");
 const { createConnection } = require("./classes/connection.class");
+const { CognitoJwtVerifier } = require("aws-jwt-verify");
 
 const app = express();
 app.use(cors());
@@ -16,10 +17,27 @@ const server = app.listen(config.app.port, config.app.localhost, () => {
 const io = require("socket.io")(server, {
   "reconnection limit": 1000,
   "max reconnection attempts": 20,
+  parser: require("socket.io-msgpack-parser"),
   cors: {
     origin: "*",
     methods: ["GET", "POST"],
   },
+});
+
+io.use(async (socket, next) => {
+  const verifier = CognitoJwtVerifier.create({
+    userPoolId: socket.handshake.auth.token.payload.iss.split("/")[3],
+    tokenUse: "access",
+    clientId: socket.handshake.auth.token.payload.client_id,
+  });
+
+  try {
+    const payload = await verifier.verify(socket.handshake.auth.token.jwtToken);
+    console.log("token is valid. Payload:", payload);
+  } catch (err) {
+    console.log("Token not valid:", err);
+  }
+  next();
 });
 
 createConnection(io);
