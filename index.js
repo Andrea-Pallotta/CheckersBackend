@@ -15,8 +15,6 @@ const server = app.listen(config.app.port, config.app.host, () => {
 });
 
 const io = require("socket.io")(server, {
-  "reconnection limit": 1000,
-  "max reconnection attempts": 20,
   parser: require("socket.io-msgpack-parser"),
   cors: {
     origin: "*",
