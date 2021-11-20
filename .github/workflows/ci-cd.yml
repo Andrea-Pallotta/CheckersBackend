@@ -1,67 +1,67 @@
-# name: CI/CD
+name: CI/CD
 
-# on:
-#   push:
-#     branches: [ main ]
+on:
+  pull_request:
+    branches: [ main ]
 
-# jobs:
-#   buildAndTest:
-#     name: CI Pipeline
-#     runs-on: ubuntu-latest
-#     strategy:
-#       matrix:
-#         node-version: ['17.x']
+jobs:
+  buildAndTest:
+    name: CI Pipeline
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: ['17.x']
 
-#     steps:
-#       - uses: actions/checkout@v2
+    steps:
+      - uses: actions/checkout@v2
 
-#       # Initialize Node.js
-#       - name: Install Node.js ${{ matrix.node-version }}
-#         uses: actions/setup-node@v1
-#         with:
-#           node-version: ${{ matrix.node-version }}
+      # Initialize Node.js
+      - name: Install Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
 
-#       # Install project dependencies, test and build
-#       - name: Install dependencies
-#         run: npm install
+      # Install project dependencies, test and build
+      - name: Install dependencies
+        run: npm install
 
-#   deploy:
-#     name: CD Pipeline
-#     runs-on: ubuntu-latest
-#     strategy:
-#       matrix:
-#         python-version: [3.8]
-#         node-version: ['17.x']
-#         appname: ['connect4']
-#         deploy-group: ['Connect4Deployment']
+  deploy:
+    name: CD Pipeline
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.8]
+        node-version: ['17.x']
+        appname: ['connect4']
+        deploy-group: ['Connect4Deployment']
 
-#     needs: buildAndTest
-#     steps:
-#       - uses: actions/checkout@v2
+    needs: buildAndTest
+    steps:
+      - uses: actions/checkout@v2
 
-#       # Initialize Node.js
-#       - name: Install Node.js ${{ matrix.node-version }}
-#         uses: actions/setup-node@v1
-#         with:
-#           node-version: ${{ matrix.node-version }}
+      # Initialize Node.js
+      - name: Install Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
 
-#       # Install project dependencies and build
-#       - name: Install dependencies
-#         run: npm install
+      # Install project dependencies and build
+      - name: Install dependencies
+        run: npm install
 
-#       # Configure AWS credentials
-#       - name: Configure AWS credentials
-#         uses: aws-actions/configure-aws-credentials@v1
-#         with:
-#           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#           aws-region: us-east-1
+      # Configure AWS credentials
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
 
-#       # Create deployment to CodeDeploy
-#       - name: AWS Create Deployment
-#         run: |
-#           aws deploy create-deployment \
-#            --application-name ${{ matrix.appname }} \
-#            --deployment-config-name CodeDeployDefault.OneAtATime \
-#            --deployment-group-name ${{ matrix.deploy-group }} \
-#            --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
+      # Create deployment to CodeDeploy
+      - name: AWS Create Deployment
+        run: |
+          aws deploy create-deployment \
+           --application-name ${{ matrix.appname }} \
+           --deployment-config-name CodeDeployDefault.OneAtATime \
+           --deployment-group-name ${{ matrix.deploy-group }} \
+           --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
