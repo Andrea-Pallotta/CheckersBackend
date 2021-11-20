@@ -10,8 +10,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-const server = app.listen(config.app.port, config.app.localhost, () => {
-  console.log(`${config.app.localhost} running on port ${config.app.port}`);
+const server = app.listen(config.app.port, config.app.host, () => {
+  console.log(`${config.app.host} running on port ${config.app.port}`);
 });
 
 const io = require("socket.io")(server, {
