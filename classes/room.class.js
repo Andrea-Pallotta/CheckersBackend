@@ -39,13 +39,13 @@ class Rooms {
   }
 
   createRoomAdapter(name) {
-    this.io.of("/").adapter.on(`${name}`, (room) => {
+    this.io.of('/').adapter.on(`${name}`, (room) => {
       console.log(`room ${room} created.`);
     });
   }
 
   joinRoomAdapter(name) {
-    this.io.of("/").adapter.on(`${name}`, (room, id) => {
+    this.io.of('/').adapter.on(`${name}`, (room, id) => {
       console.log(`socket ${id} joined room ${room}`);
     });
   }

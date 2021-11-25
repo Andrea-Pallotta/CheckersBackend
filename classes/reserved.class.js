@@ -1,11 +1,12 @@
 /* eslint-disable no-unused-vars */
 class Reserved {
-  constructor(io, socket, sockets, global, messages) {
+  constructor(io, socket, sockets, global, messages, queue) {
     this.io = io;
     this.socket = socket;
     this.sockets = sockets;
     this.global = global;
     this.messages = messages;
+    this.queue = queue;
   }
 
   disconnect() {
@@ -15,12 +16,21 @@ class Reserved {
 
   deleteSocket() {
     [...this.sockets].forEach((value) => {
-      if (value[0] === this.socket.id) {
-        this.sockets.delete(value[0]);
+      if (value === this.socket.id) {
+        this.sockets.delete(value);
         this.deleteGlobal();
         return;
       }
     });
+  }
+
+  inQueue() {
+    [...this.queue].forEach((value) => {
+      if (value.id === this.socket.id) {
+        return true;
+      }
+    });
+    return false;
   }
 
   deleteGlobal() {
@@ -52,7 +62,7 @@ class Reserved {
     if (username) {
       this.deleteGlobalByUsername(username);
     }
-    this.rooms.leave(room || "public-chat-room");
+    this.rooms.leave(room || 'public-chat-room');
     this.disconnect();
   }
 

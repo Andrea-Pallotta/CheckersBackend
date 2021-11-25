@@ -1,9 +1,9 @@
-const Sender = require("./sender.class");
-const Receiver = require("./receiver.class");
-const Reserved = require("./reserved.class");
-const Rooms = require("./room.class");
-const User = require("./user.class");
-const Constants = require("./constants.class");
+const Sender = require('./sender.class');
+const Receiver = require('./receiver.class');
+const Reserved = require('./reserved.class');
+const Rooms = require('./room.class');
+const User = require('./user.class');
+const Constants = require('./constants.class');
 
 class Connection {
   constructor(io, socket, sockets, global, messages, queue, gameCount, user) {
@@ -22,14 +22,16 @@ class Connection {
       this.socket,
       this.sockets,
       this.global,
-      this.messages
+      this.messages,
+      this.queue
     );
     this.sender = new Sender(
       this.io,
       this.socket,
       this.sockets,
       this.global,
-      this.messages
+      this.messages,
+      this.queue
     );
     this.receiver = new Receiver(
       this.io,
@@ -39,7 +41,8 @@ class Connection {
       this.messages,
       this.queue,
       this.gameCount,
-      this.user
+      this.user,
+      this.rooms
     );
   }
 
@@ -49,7 +52,7 @@ class Connection {
 }
 
 const createConnection = (io) => {
-  io.on("connection", (socket) => {
+  io.on('connection', (socket) => {
     const connection = new Connection(
       io,
       socket,
@@ -60,9 +63,8 @@ const createConnection = (io) => {
       Constants.GAMECOUNT,
       new User(socket.handshake.query.username, socket.id)
     );
-
     connection.reserved.addSocket();
-    connection.sender.basic("connection", socket.id);
+    connection.sender.basic('connection', socket.id);
   });
 };
 

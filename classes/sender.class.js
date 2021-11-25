@@ -1,8 +1,8 @@
-const Reserved = require("./reserved.class");
+const Reserved = require('./reserved.class');
 
 class Sender extends Reserved {
-  constructor(io, socket, sockets, global, messages) {
-    super(io, socket, sockets, global, messages);
+  constructor(io, socket, sockets, global, messages, queue) {
+    super(io, socket, sockets, global, messages, queue);
   }
 
   basic(name, object) {
