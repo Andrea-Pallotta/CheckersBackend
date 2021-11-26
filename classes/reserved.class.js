@@ -33,9 +33,9 @@ class Reserved {
     return false;
   }
 
-  deleteGlobal() {
+  deleteGlobal(id) {
     [...this.global].forEach((value) => {
-      if (value[0].id === this.socket.id) {
+      if (value[0].id === id ? id : this.socket.id) {
         this.global.delete(value[0]);
       }
     });
@@ -54,13 +54,13 @@ class Reserved {
   }
 
   addUser(user) {
-    this.deleteGlobalByUsername(user.username);
+    this.deleteGlobal(user.id);
     this.global.set(user, 1);
   }
 
-  onError(username, room) {
-    if (username) {
-      this.deleteGlobalByUsername(username);
+  onError(room) {
+    if (this.socket) {
+      this.deleteGlobal(this.socket.id);
     }
     this.rooms.leave(room || 'public-chat-room');
     this.disconnect();

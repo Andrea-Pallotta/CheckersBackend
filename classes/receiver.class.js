@@ -4,6 +4,7 @@ const Rooms = require('./room.class');
 const Reserved = require('./reserved.class');
 const Message = require('./message.class');
 const { INITIAL_GAME_STATE } = require('./constants.class');
+const Game = require('./game.class');
 
 class Receiver extends Reserved {
   constructor(
@@ -36,7 +37,7 @@ class Receiver extends Reserved {
     this.socket.on('game-message', (content) =>
       this.gameMessage(content.message, content.roomId)
     );
-    this.socket.on('game-move', (game) => this.gameMove(game));
+    this.socket.on('game-move', (game) => this.gameMove(Game.fromJSON(game)));
   }
 
   joinChat() {
@@ -63,6 +64,8 @@ class Receiver extends Reserved {
     } else {
       if (this.inQueue() === false) {
         this.queue.shift().then((queuedUser) => {
+          this.deleteGlobal();
+          this.deleteGlobal(queuedUser.id);
           this.rooms.join(`game-room-${this.gameCount}`);
           this.rooms.socketJoin(
             this.io.sockets.sockets.get(queuedUser.id),
@@ -92,7 +95,10 @@ class Receiver extends Reserved {
     );
   }
 
-  gameMove(game) {}
+  gameMove(game) {
+    console.log('game inside', game);
+    this.sender.roomsAll('send-move', game, `game-room-${game.roomId}`);
+  }
 
   onDisconnect() {
     this.disconnect();

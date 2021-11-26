@@ -18,13 +18,13 @@ class Constants {
   static QUEUE = new WaitQueue();
   static GAMECOUNT = 0;
 
-  static INITIAL_GAME_STATE = (player1, player2, gameId) => {
+  static INITIAL_GAME_STATE = (player1, player2, roomId) => {
     return new Game(
       this.NEW_GAME_BOARD,
       player1,
       player2,
       1,
-      gameId,
+      roomId,
       '',
       false
     );

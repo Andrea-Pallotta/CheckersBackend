@@ -1,10 +1,10 @@
 class Game {
-  constructor(board, player1, player2, turn, gameId, message, gameEnded) {
+  constructor(board, player1, player2, turn, roomId, message, gameEnded) {
     this.board = board;
     this.player1 = player1;
     this.player2 = player2;
     this.turn = turn;
-    this.gameId = gameId;
+    this.roomId = roomId;
     this.message = message;
     this.gameEnded = gameEnded;
   }
