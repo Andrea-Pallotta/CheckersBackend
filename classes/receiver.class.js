@@ -96,7 +96,15 @@ class Receiver extends Reserved {
   }
 
   gameMove(game) {
-    console.log('game inside', game);
+    game.board[game.move.x][game.move.y] = game.turn;
+    game.move.x = undefined;
+    game.move.y = undefined;
+    if (game.checkWin() === true) {
+      console.log('game ended');
+    }
+    game.turn = game.turn === 1 ? 2 : 1;
+
+    console.log(game);
     this.sender.roomsAll('send-move', game, `game-room-${game.roomId}`);
   }
 

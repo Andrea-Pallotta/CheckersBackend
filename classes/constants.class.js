@@ -24,6 +24,7 @@ class Constants {
       player1,
       player2,
       1,
+      { x: undefined, y: undefined },
       roomId,
       '',
       false
