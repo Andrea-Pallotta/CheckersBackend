@@ -1,9 +1,12 @@
 class Game {
-  constructor(state, players, turn, roomId) {
-    this.state = state;
-    this.players = players;
+  constructor(board, player1, player2, turn, gameId, message, gameEnded) {
+    this.board = board;
+    this.player1 = player1;
+    this.player2 = player2;
     this.turn = turn;
-    this.roomId = roomId;
+    this.gameId = gameId;
+    this.message = message;
+    this.gameEnded = gameEnded;
   }
 
   static fromJSON(json) {

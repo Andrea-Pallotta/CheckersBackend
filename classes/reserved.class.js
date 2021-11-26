@@ -10,8 +10,8 @@ class Reserved {
   }
 
   disconnect() {
-    this.socket.disconnect();
     this.deleteSocket();
+    this.deleteGlobal();
   }
 
   deleteSocket() {

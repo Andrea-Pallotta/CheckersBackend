@@ -29,21 +29,14 @@ class Receiver extends Reserved {
     this.rooms = rooms;
     this.user = user;
     this.gameCount = gameCount;
-    this.socket.on('disconnect', this.onDisconnect);
+    this.socket.on('disconnect', () => this.onDisconnect());
     this.socket.on('join-public-chat', () => this.joinChat());
     this.socket.on('public-message', (message) => this.publicMessage(message));
     this.socket.on('join-queue', () => this.joinQueue());
     this.socket.on('game-message', (content) =>
       this.gameMessage(content.message, content.roomId)
     );
-    this.socket.on('game-move', (content) =>
-      this.gameMove(
-        content.state,
-        content.players,
-        content.turn,
-        content.roomId
-      )
-    );
+    this.socket.on('game-move', (game) => this.gameMove(game));
   }
 
   joinChat() {
@@ -68,17 +61,17 @@ class Receiver extends Reserved {
     if (this.queue.length === 0) {
       this.queue.push(this.user);
     } else {
-      if (this.inQueue === false) {
+      if (this.inQueue() === false) {
         this.queue.shift().then((queuedUser) => {
-          this.rooms.join(`game-timer-${this.gameCount}`);
+          this.rooms.join(`game-room-${this.gameCount}`);
           this.rooms.socketJoin(
             this.io.sockets.sockets.get(queuedUser.id),
-            `game-timer-${this.gameCount}`
+            `game-room-${this.gameCount}`
           );
           this.sender.roomsAll(
             'start-game',
             INITIAL_GAME_STATE(this.user, queuedUser, this.gameCount),
-            `game-timer-${this.gameCount}`
+            `game-room-${this.gameCount}`
           );
           this.sender.roomsNoSender(
             'joined-public-chat',
@@ -90,11 +83,6 @@ class Receiver extends Reserved {
       }
     }
   }
-  /**
-   1. Player accepts game
-   2. If player 2 accepts, start game
-   3. Otherwise call joinQUeue()
-   */
 
   gameMessage(message, roomId) {
     this.sender.roomsNoSender(
@@ -104,12 +92,16 @@ class Receiver extends Reserved {
     );
   }
 
-  gameMove(state, players, turn, roomId) {
-    console.log(state, players, turn, roomId);
-  }
+  gameMove(game) {}
 
   onDisconnect() {
     this.disconnect();
+    this.sender.roomsAll(
+      'joined-public-chat',
+      serialize(this.global),
+      'public-chat'
+    );
+    this.socket.disconnect();
   }
 }
 

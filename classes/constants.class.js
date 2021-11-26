@@ -1,4 +1,5 @@
-const WaitQueue = require("wait-queue");
+const WaitQueue = require('wait-queue');
+const Game = require('./game.class');
 
 class Constants {
   static NEW_GAME_BOARD = [
@@ -17,14 +18,16 @@ class Constants {
   static QUEUE = new WaitQueue();
   static GAMECOUNT = 0;
 
-  static INITIAL_GAME_STATE = (player1, player2, roomId) => {
-    return {
-      board: this.NEW_GAME_BOARD,
-      player1: player1,
-      player2: player2,
-      turn: 1,
-      roomId: roomId,
-    };
+  static INITIAL_GAME_STATE = (player1, player2, gameId) => {
+    return new Game(
+      this.NEW_GAME_BOARD,
+      player1,
+      player2,
+      1,
+      gameId,
+      '',
+      false
+    );
   };
 }
 
