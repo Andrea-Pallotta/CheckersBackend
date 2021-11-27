@@ -26,8 +26,9 @@ class Constants {
       1,
       { x: undefined, y: undefined },
       roomId,
-      '',
-      false
+      `It's ${player1.username} turn.`,
+      false,
+      undefined
     );
   };
 }

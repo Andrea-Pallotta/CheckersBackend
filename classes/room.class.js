@@ -34,6 +34,12 @@ class Rooms {
     return this.io.in(`${room}`);
   }
 
+  deleteRoom(room) {
+    this.getSockets(room).forEach((socket) => {
+      this.socketLeave(socket);
+    });
+  }
+
   getRooms() {
     return this.io.sockets.adapter.rooms;
   }

@@ -38,6 +38,7 @@ class Receiver extends Reserved {
       this.gameMessage(content.message, content.roomId)
     );
     this.socket.on('game-move', (game) => this.gameMove(Game.fromJSON(game)));
+    this.socket.on('leave-room', (roomId) => this.leaveRoom(roomId));
   }
 
   joinChat() {
@@ -99,13 +100,26 @@ class Receiver extends Reserved {
     game.board[game.move.x][game.move.y] = game.turn;
     game.move.x = undefined;
     game.move.y = undefined;
-    if (game.checkWin() === true) {
-      console.log('game ended');
+    game.checkWin();
+    if (game.gameEnded === true) {
+      game.winner = game.turn;
+      game.message = `${
+        game.turn === 1 ? game.player1.username : game.player2.username
+      } won the game!`;
+    } else {
+      game.turn = game.turn === 1 ? 2 : 1;
+      game.message = `It's ${
+        game.turn === 1 ? game.player1.username : game.player2.username
+      } turn.`;
     }
-    game.turn = game.turn === 1 ? 2 : 1;
 
     console.log(game);
     this.sender.roomsAll('send-move', game, `game-room-${game.roomId}`);
+  }
+
+  leaveRoom(name, room) {
+    this.sender.roomsNoSender(name, {}, room);
+    this.rooms.deleteRoom(room);
   }
 
   onDisconnect() {

@@ -6,8 +6,6 @@ const config = require('./configs/configs')();
 const { createConnection } = require('./classes/connection.class');
 const { CognitoJwtVerifier } = require('aws-jwt-verify');
 
-console.log(process.env.NODE_ENV);
-
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -33,7 +31,7 @@ io.use(async (socket, next) => {
     });
     await verifier.verify(socket.handshake.auth.token.jwtToken);
   } catch (err) {
-    console.log('Validation failed');
+    throw Error(`validation failed ${err}`);
   }
   next();
 });
