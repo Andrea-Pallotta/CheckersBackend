@@ -30,18 +30,27 @@ class Rooms {
     this.socketJoin(socket, `${joinRoom}`);
   }
 
-  getSockets(room) {
-    return this.io.in(`${room}`);
+  deleteRoom(leaveRoom, joinRoom) {
+    this.io.in(leaveRoom).socketsJoin(joinRoom);
+    this.io.socketsLeave(leaveRoom);
   }
 
-  deleteRoom(room) {
-    this.getSockets(room).forEach((socket) => {
-      this.socketLeave(socket);
+  leaveAll() {
+    this.getRooms().forEach((room) => {
+      this.socket.leave(room);
+    });
+  }
+
+  async getRoomSocketsAndEmit(action, room, arg = {}) {
+    const sockets = await this.io.in(room).fetchSockets();
+
+    sockets.forEach((socket) => {
+      socket.emit(action, arg);
     });
   }
 
   getRooms() {
-    return this.io.sockets.adapter.rooms;
+    return this.socket.rooms;
   }
 
   createRoomAdapter(name) {

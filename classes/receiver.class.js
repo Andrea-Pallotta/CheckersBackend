@@ -1,23 +1,13 @@
 const { serialize } = require('../utilities/utilities');
 const Sender = require('./sender.class');
-const Rooms = require('./room.class');
 const Reserved = require('./reserved.class');
 const Message = require('./message.class');
 const { INITIAL_GAME_STATE } = require('./constants.class');
 const Game = require('./game.class');
+const Rooms = require('./room.class');
 
 class Receiver extends Reserved {
-  constructor(
-    io,
-    socket,
-    sockets,
-    global,
-    messages,
-    queue,
-    gameCount,
-    user,
-    rooms
-  ) {
+  constructor(io, socket, sockets, global, messages, queue, gameCount, user) {
     super(io, socket, sockets, global, messages, queue);
     this.sender = new Sender(
       this.io,
@@ -27,10 +17,11 @@ class Receiver extends Reserved {
       this.messages,
       this.queue
     );
-    this.rooms = rooms;
+    this.rooms = new Rooms(this.io, this.socket);
     this.user = user;
     this.gameCount = gameCount;
     this.socket.on('disconnect', () => this.onDisconnect());
+    this.socket.on('disconnecting', () => this.onDisconnecting());
     this.socket.on('join-public-chat', () => this.joinChat());
     this.socket.on('public-message', (message) => this.publicMessage(message));
     this.socket.on('join-queue', () => this.joinQueue());
@@ -38,7 +29,9 @@ class Receiver extends Reserved {
       this.gameMessage(content.message, content.roomId)
     );
     this.socket.on('game-move', (game) => this.gameMove(Game.fromJSON(game)));
-    this.socket.on('leave-room', (roomId) => this.leaveRoom(roomId));
+    this.socket.on('forfeit-game', (username, gameId) =>
+      this.forfeitGame(username, gameId)
+    );
   }
 
   joinChat() {
@@ -65,8 +58,8 @@ class Receiver extends Reserved {
     } else {
       if (this.inQueue() === false) {
         this.queue.shift().then((queuedUser) => {
-          this.deleteGlobal();
-          this.deleteGlobal(queuedUser.id);
+          this.deleteGlobal(this.user.username);
+          this.deleteGlobal(queuedUser.username);
           this.rooms.join(`game-room-${this.gameCount}`);
           this.rooms.socketJoin(
             this.io.sockets.sockets.get(queuedUser.id),
@@ -117,13 +110,23 @@ class Receiver extends Reserved {
     this.sender.roomsAll('send-move', game, `game-room-${game.roomId}`);
   }
 
-  leaveRoom(name, room) {
-    this.sender.roomsNoSender(name, {}, room);
-    this.rooms.deleteRoom(room);
+  forfeitGame(username, gameId) {
+    console.log(username);
+    console.log(gameId);
+    this.rooms.getRoomSocketsAndEmit(
+      'game-forfeited',
+      `${username} forfeited the game.`,
+      `game-room-${gameId}`
+    );
+    this.rooms.deleteRoom(`game-room-${gameId}`, 'public-chat');
+    this.joinChat();
+  }
+
+  onDisconnecting() {
+    this.rooms.leaveAll();
   }
 
   onDisconnect() {
-    this.disconnect();
     this.sender.roomsAll(
       'joined-public-chat',
       serialize(this.global),

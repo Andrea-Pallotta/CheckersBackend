@@ -9,16 +9,15 @@ class Reserved {
     this.queue = queue;
   }
 
-  disconnect() {
-    this.deleteSocket();
-    this.deleteGlobal();
+  disconnect(username) {
+    this.deleteSocket(username);
   }
 
-  deleteSocket() {
+  deleteSocket(username) {
     [...this.sockets].forEach((value) => {
-      if (value === this.socket.id) {
+      if (value[0] === username) {
         this.sockets.delete(value);
-        this.deleteGlobal();
+        this.deleteGlobal(username);
         return;
       }
     });
@@ -33,15 +32,7 @@ class Reserved {
     return false;
   }
 
-  deleteGlobal(id) {
-    [...this.global].forEach((value) => {
-      if (value[0].id === id ? id : this.socket.id) {
-        this.global.delete(value[0]);
-      }
-    });
-  }
-
-  deleteGlobalByUsername(username) {
+  deleteGlobal(username) {
     [...this.global].forEach((value) => {
       if (value[0].username === username) {
         this.global.delete(value[0]);
@@ -49,12 +40,12 @@ class Reserved {
     });
   }
 
-  addSocket() {
-    this.sockets.set(this.socket.id, 1);
+  addSocket(username) {
+    this.sockets.set(username, this.socket.id);
   }
 
   addUser(user) {
-    this.deleteGlobal(user.id);
+    this.deleteGlobal(user.username);
     this.global.set(user, 1);
   }
 
