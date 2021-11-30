@@ -29,9 +29,7 @@ class Receiver extends Reserved {
       this.gameMessage(content.message, content.roomId)
     );
     this.socket.on('game-move', (game) => this.gameMove(Game.fromJSON(game)));
-    this.socket.on('forfeit-game', (username, gameId) =>
-      this.forfeitGame(username, gameId)
-    );
+    this.socket.on('forfeit-game', (gameState) => this.forfeitGame(gameState));
   }
 
   joinChat() {
@@ -101,25 +99,22 @@ class Receiver extends Reserved {
       } won the game!`;
     } else {
       game.turn = game.turn === 1 ? 2 : 1;
-      game.message = `It's ${
+      game.message = `Current turn: ${
         game.turn === 1 ? game.player1.username : game.player2.username
-      } turn.`;
+      }`;
     }
-
-    console.log(game);
     this.sender.roomsAll('send-move', game, `game-room-${game.roomId}`);
   }
 
-  forfeitGame(username, gameId) {
-    console.log(username);
-    console.log(gameId);
-    this.rooms.getRoomSocketsAndEmit(
+  forfeitGame(gameState) {
+    gameState.message = `${gameState.winner.username} won the game!`;
+    gameState.gameEnded = true;
+    this.sender.roomsAll(
       'game-forfeited',
-      `${username} forfeited the game.`,
-      `game-room-${gameId}`
+      gameState,
+      `game-room-${gameState.roomId}`
     );
-    this.rooms.deleteRoom(`game-room-${gameId}`, 'public-chat');
-    this.joinChat();
+    this.rooms.deleteRoom(`game-room-${gameState.gameId}`);
   }
 
   onDisconnecting() {

@@ -30,8 +30,7 @@ class Rooms {
     this.socketJoin(socket, `${joinRoom}`);
   }
 
-  deleteRoom(leaveRoom, joinRoom) {
-    this.io.in(leaveRoom).socketsJoin(joinRoom);
+  deleteRoom(leaveRoom) {
     this.io.socketsLeave(leaveRoom);
   }
 
