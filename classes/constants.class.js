@@ -11,7 +11,6 @@ class Constants {
     [0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0],
   ];
-
   static SOCKETS = new Map();
   static GLOBAL = new Map();
   static MESSAGES = new Set();

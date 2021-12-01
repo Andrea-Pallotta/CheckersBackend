@@ -88,23 +88,26 @@ class Receiver extends Reserved {
   }
 
   gameMove(game) {
-    if (game.move.x && game.move.y) {
-      game.board[game.move.x][game.move.y] = game.turn;
-      game.move.x = undefined;
-      game.move.y = undefined;
-      game.checkWin();
-    }
     if (game.gameEnded === true) {
+      console.log('game ended');
+      console.log('gameEnded');
       game.winner = game.turn;
       game.message = `${
         game.turn === 1 ? game.player1.username : game.player2.username
       } won the game!`;
     } else {
+      if (game.move.x !== undefined && game.move.y !== undefined) {
+        game.board[game.move.x][game.move.y] = game.turn;
+        game.move.x = undefined;
+        game.move.y = undefined;
+        game.checkWin();
+      }
       game.turn = game.turn === 1 ? 2 : 1;
       game.message = `Current turn: ${
         game.turn === 1 ? game.player1.username : game.player2.username
       }`;
     }
+    console.log('after:', game);
     this.sender.roomsAll('send-move', game, `game-room-${game.roomId}`);
   }
 

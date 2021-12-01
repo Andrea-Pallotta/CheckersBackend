@@ -1,8 +1,7 @@
 const express = require('express');
 const cors = require('cors');
+
 const config = require('./configs/configs')();
-// const db = require("./utilities/mongo.connect");
-// const endpoints = require("./utilities/endpoint.utilities");
 const { createConnection } = require('./classes/connection.class');
 const { CognitoJwtVerifier } = require('aws-jwt-verify');
 
@@ -31,7 +30,7 @@ io.use(async (socket, next) => {
     });
     await verifier.verify(socket.handshake.auth.token.jwtToken);
   } catch (err) {
-    throw Error(`validation failed ${err}`);
+    console.log(`validation failed ${err}`);
   }
   next();
 });
