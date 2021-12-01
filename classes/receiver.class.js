@@ -88,10 +88,12 @@ class Receiver extends Reserved {
   }
 
   gameMove(game) {
-    game.board[game.move.x][game.move.y] = game.turn;
-    game.move.x = undefined;
-    game.move.y = undefined;
-    game.checkWin();
+    if (game.move.x && game.move.y) {
+      game.board[game.move.x][game.move.y] = game.turn;
+      game.move.x = undefined;
+      game.move.y = undefined;
+      game.checkWin();
+    }
     if (game.gameEnded === true) {
       game.winner = game.turn;
       game.message = `${
