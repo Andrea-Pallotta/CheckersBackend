@@ -134,24 +134,27 @@ class Receiver extends Reserved {
   }
 
   gameMove(game) {
-    if (game.gameEnded === true) {
-      game.winner = game.turn;
-      game.message = `${
-        game.turn === 1 ? game.player1.username : game.player2.username
-      } won the game!`;
-      this.games.delete(game.roomId);
-    } else {
-      if (game.move.x !== undefined && game.move.y !== undefined) {
-        game.board[game.move.x][game.move.y] = game.turn;
-        game.move.x = undefined;
-        game.move.y = undefined;
-        game.checkWin();
+    if (game.move.x !== undefined && game.move.y !== undefined) {
+      game.board[game.move.x][game.move.y] = game.turn;
+      game.move.x = undefined;
+      game.move.y = undefined;
+      game.checkWin();
+
+      if (game.gameEnded === true) {
+        game.gameEnded = true;
+        game.winner = game.turn;
+        game.message = `${
+          game.turn === 1 ? game.player1.username : game.player2.username
+        } won the game!`;
+        this.games.delete(game.roomId);
+        Helper.clearActiveGame(game.player1.username, game.player2.username);
+      } else {
+        game.turn = game.turn === 1 ? 2 : 1;
+        game.message = `Current turn: ${
+          game.turn === 1 ? game.player1.username : game.player2.username
+        }`;
+        this.games.set(game.roomId, game);
       }
-      game.turn = game.turn === 1 ? 2 : 1;
-      game.message = `Current turn: ${
-        game.turn === 1 ? game.player1.username : game.player2.username
-      }`;
-      this.games.set(game.roomId, game);
     }
     this.sender.roomsAll('send-move', game, `game-room-${game.roomId}`);
   }

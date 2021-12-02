@@ -51,6 +51,17 @@ class Helper {
         );
       });
   }
+
+  static clearActiveGame(...usernames) {
+    usernames.forEach((username) => {
+      DB().update(
+        'users',
+        { activeGame: null },
+        ['username = ?', username],
+        ['activeGame']
+      );
+    });
+  }
 }
 
 module.exports = Helper;
