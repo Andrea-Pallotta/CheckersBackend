@@ -8,6 +8,7 @@ CREATE TABLE 'users' (
     draws INT DEFAULT 0,
     losses INT DEFAULT 0,
     score INT DEFAULT 0,
+    activeGame STRING
 );
 
 -- Down

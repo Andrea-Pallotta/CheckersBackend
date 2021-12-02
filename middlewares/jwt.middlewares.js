@@ -1,10 +1,22 @@
 const { CognitoJwtVerifier } = require('aws-jwt-verify');
 const Response = require('../classes/response.class');
 
+const extractToken = (auth) => {
+  const split = auth.split(' ');
+  const type = split[0];
+  const token = JSON.parse(split[1]);
+
+  if (token && type === 'Bearer') {
+    return token;
+  }
+
+  return null;
+};
+
 const jwtAuth = async (req, res, next) => {
   res.setHeader('Content-Type', 'application/json');
   try {
-    const token = req.headers.authorization;
+    const token = extractToken(req.headers.authorization);
     const verifier = CognitoJwtVerifier.create({
       userPoolId: token.payload.iss.split('/')[3],
       tokenUse: 'access',

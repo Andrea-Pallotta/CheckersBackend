@@ -8,15 +8,17 @@ const { CognitoJwtVerifier } = require('aws-jwt-verify');
 const jwtAuth = require('./middlewares/jwt.middlewares');
 
 const routes = require('./routes/routes');
+const Helper = require('./classes/helper.class');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-// app.use(jwtAuth);
+app.use(jwtAuth);
 app.use('/api', routes);
 
 const server = app.listen(config.app.port, config.app.host, () => {
+  Helper.clearActiveGames();
   console.log(`${config.app.host} running on port ${config.app.port}`);
 });
 

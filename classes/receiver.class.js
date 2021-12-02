@@ -5,9 +5,20 @@ const Message = require('./message.class');
 const { INITIAL_GAME_STATE } = require('./constants.class');
 const Game = require('./game.class');
 const Rooms = require('./room.class');
+const Helper = require('./helper.class');
 
 class Receiver extends Reserved {
-  constructor(io, socket, sockets, global, messages, queue, gameCount, user) {
+  constructor(
+    io,
+    socket,
+    sockets,
+    global,
+    messages,
+    queue,
+    gameCount,
+    user,
+    games
+  ) {
     super(io, socket, sockets, global, messages, queue);
     this.sender = new Sender(
       this.io,
@@ -20,6 +31,7 @@ class Receiver extends Reserved {
     this.rooms = new Rooms(this.io, this.socket);
     this.user = user;
     this.gameCount = gameCount;
+    this.games = games;
     this.socket.on('disconnect', () => this.onDisconnect());
     this.socket.on('disconnecting', () => this.onDisconnecting());
     this.socket.on('join-public-chat', () => this.joinChat());
@@ -28,6 +40,7 @@ class Receiver extends Reserved {
     this.socket.on('game-message', (content) =>
       this.gameMessage(content.message, content.roomId)
     );
+    this.socket.on('get-current-game', (id) => this.getCurrentGame(id));
     this.socket.on('game-move', (game) => this.gameMove(Game.fromJSON(game)));
     this.socket.on('forfeit-game', (gameState) => this.forfeitGame(gameState));
   }
@@ -56,24 +69,48 @@ class Receiver extends Reserved {
     } else {
       if (this.inQueue() === false) {
         this.queue.shift().then((queuedUser) => {
-          this.deleteGlobal(this.user.username);
-          this.deleteGlobal(queuedUser.username);
-          this.rooms.join(`game-room-${this.gameCount}`);
-          this.rooms.socketJoin(
-            this.io.sockets.sockets.get(queuedUser.socketId),
-            `game-room-${this.gameCount}`
-          );
-          this.sender.roomsAll(
-            'start-game',
-            INITIAL_GAME_STATE(this.user, queuedUser, this.gameCount),
-            `game-room-${this.gameCount}`
-          );
-          this.sender.roomsNoSender(
-            'joined-public-chat',
-            serialize(this.global),
-            'public-chat'
-          );
-          this.gameCount += 1;
+          try {
+            this.rooms.join(`game-room-${this.gameCount}`);
+            this.rooms.socketJoin(
+              this.io.sockets.sockets.get(queuedUser.socketId),
+              `game-room-${this.gameCount}`
+            );
+            this.games.set(
+              this.gameCount,
+              INITIAL_GAME_STATE(this.user, queuedUser, this.gameCount)
+            );
+            Helper.updateActiveGames(
+              this.gameCount,
+              this.user.username,
+              queuedUser.username
+            );
+
+            this.sender.roomsAll(
+              'start-game',
+              INITIAL_GAME_STATE(this.user, queuedUser, this.gameCount),
+              `game-room-${this.gameCount}`
+            );
+            this.deleteGlobal(this.user.username);
+            this.deleteGlobal(queuedUser.username);
+            this.sender.roomsNoSender(
+              'joined-public-chat',
+              serialize(this.global),
+              'public-chat'
+            );
+            this.gameCount += 1;
+          } catch {
+            this.games.delete(this.gameCount);
+            this.sender.roomsAll(
+              'queue-failed',
+              {},
+              `game-room-${this.gameCount}`
+            );
+            this.rooms.leave(`game-room-${this.gameCount}`);
+            this.rooms.socketLeave(
+              this.io.sockets.sockets.get(queuedUser.socketId),
+              `game-room-${this.gameCount}`
+            );
+          }
         });
       }
     }
@@ -87,14 +124,22 @@ class Receiver extends Reserved {
     );
   }
 
+  getCurrentGame(id) {
+    if (id !== null && this.games.get(id)) {
+      this.rooms.join(`game-room-${id}`);
+      if (this.games.get(id)) {
+        this.sender.roomsAll('reconnect-game', this.games.get(id));
+      }
+    }
+  }
+
   gameMove(game) {
     if (game.gameEnded === true) {
-      console.log('game ended');
-      console.log('gameEnded');
       game.winner = game.turn;
       game.message = `${
         game.turn === 1 ? game.player1.username : game.player2.username
       } won the game!`;
+      this.games.delete(game.roomId);
     } else {
       if (game.move.x !== undefined && game.move.y !== undefined) {
         game.board[game.move.x][game.move.y] = game.turn;
@@ -106,8 +151,8 @@ class Receiver extends Reserved {
       game.message = `Current turn: ${
         game.turn === 1 ? game.player1.username : game.player2.username
       }`;
+      this.games.set(game.roomId, game);
     }
-    console.log('after:', game);
     this.sender.roomsAll('send-move', game, `game-room-${game.roomId}`);
   }
 

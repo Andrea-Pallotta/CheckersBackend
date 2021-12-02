@@ -1,24 +1,26 @@
 class User {
   constructor(
     username,
+    socketId,
     email,
     accessToken,
-    socketId,
     wins,
     draws,
     losses,
     score,
-    id
+    id,
+    activeGame
   ) {
     this.username = username;
+    this.socketId = socketId;
     this.email = email;
     this.accessToken = accessToken;
-    this.socketId = socketId;
     this.wins = wins;
     this.draws = draws;
     this.losses = losses;
     this.score = score;
     this.id = id;
+    this.activeGame = activeGame;
   }
 
   getUsername() {

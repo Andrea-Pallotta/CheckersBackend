@@ -15,7 +15,7 @@ class Reserved {
 
   deleteSocket(username) {
     [...this.sockets].forEach((value) => {
-      if (value[0] === username) {
+      if (value[0].id === username) {
         this.sockets.delete(value);
         this.deleteGlobal(username);
         return;
@@ -41,7 +41,7 @@ class Reserved {
   }
 
   addSocket(username) {
-    this.sockets.set(username, this.socket.id);
+    this.sockets.set(username, this.socket);
   }
 
   addUser(user) {
