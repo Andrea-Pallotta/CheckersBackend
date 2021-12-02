@@ -19,8 +19,10 @@
   },
   "homepage": "https://github.com/Andrea-Pallotta/CheckersBackend#readme",
   "dependencies": {
+    "ajv": "^8.8.2",
     "aws-jwt-verify": "^1.0.3",
     "better-sqlite3": "^7.4.5",
+    "better-sqlite3-helper": "^3.1.6",
     "cors": "2.8.5",
     "cross-env": "^7.0.3",
     "dotenv": "^10.0.0",
@@ -29,6 +31,7 @@
     "socket.io": "4.2.0",
     "socket.io-msgpack-parser": "^3.0.1",
     "uuid": "^8.3.2",
+    "validator": "^13.7.0",
     "wait-queue": "^1.1.4"
   },
   "devDependencies": {

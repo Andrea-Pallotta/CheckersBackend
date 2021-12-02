@@ -1,3 +1,7 @@
-const db = require('./init.db');
+const DB = require('better-sqlite3-helper');
 
-module.exports = {};
+const allUsers = DB().query('SELECT * FROM users');
+
+module.exports = {
+  allUsers,
+};

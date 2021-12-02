@@ -25,7 +25,7 @@ class Reserved {
 
   inQueue() {
     [...this.queue].forEach((value) => {
-      if (value.id === this.socket.id) {
+      if (value.socketId === this.socket.id) {
         return true;
       }
     });
@@ -59,7 +59,7 @@ class Reserved {
 
   getUser() {
     return [...this.global.keys()].filter((key) => {
-      return key.id === this.socket.id;
+      return key.socketId === this.socket.id;
     });
   }
 }

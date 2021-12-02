@@ -1,14 +1,21 @@
 const express = require('express');
 const cors = require('cors');
+require('./database/init.db');
 
 const config = require('./configs/configs')();
 const { createConnection } = require('./classes/connection.class');
 const { CognitoJwtVerifier } = require('aws-jwt-verify');
+const jwtAuth = require('./middlewares/jwt.middlewares');
+
+const routes = require('./routes/routes');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+// app.use(jwtAuth);
+app.use('/api', routes);
+
 const server = app.listen(config.app.port, config.app.host, () => {
   console.log(`${config.app.host} running on port ${config.app.port}`);
 });

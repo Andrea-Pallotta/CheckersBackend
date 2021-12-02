@@ -1,6 +1,23 @@
 class User {
-  constructor(username, id) {
+  constructor(
+    username,
+    email,
+    accessToken,
+    socketId,
+    wins,
+    draws,
+    losses,
+    score,
+    id
+  ) {
     this.username = username;
+    this.email = email;
+    this.accessToken = accessToken;
+    this.socketId = socketId;
+    this.wins = wins;
+    this.draws = draws;
+    this.losses = losses;
+    this.score = score;
     this.id = id;
   }
 
@@ -16,8 +33,12 @@ class User {
     this.username = username;
   }
 
-  setId(id) {
-    this.id = id;
+  setId(socketId) {
+    this.socketId = socketId;
+  }
+
+  static fromJSON(json) {
+    return Object.assign(new User(), json);
   }
 }
 

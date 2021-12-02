@@ -60,7 +60,7 @@ class Receiver extends Reserved {
           this.deleteGlobal(queuedUser.username);
           this.rooms.join(`game-room-${this.gameCount}`);
           this.rooms.socketJoin(
-            this.io.sockets.sockets.get(queuedUser.id),
+            this.io.sockets.sockets.get(queuedUser.socketId),
             `game-room-${this.gameCount}`
           );
           this.sender.roomsAll(

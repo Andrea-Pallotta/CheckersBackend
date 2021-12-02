@@ -1,4 +1,13 @@
-const Database = require('better-sqlite3');
-const db = new Database('connect4.db', { verbose: console.log });
+const DB = require('better-sqlite3-helper');
 
-module.exports = db;
+DB({
+  path: './database/connect4.db',
+  readonly: false,
+  fileMustExist: false,
+  WAL: true,
+  migrate: {
+    force: false,
+    table: 'migration',
+    migrationsPath: './migrations',
+  },
+});
