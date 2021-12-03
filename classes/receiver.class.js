@@ -2,7 +2,7 @@ const { serialize } = require('../utilities/utilities');
 const Sender = require('./sender.class');
 const Reserved = require('./reserved.class');
 const Message = require('./message.class');
-const { INITIAL_GAME_STATE } = require('./constants.class');
+const Constants = require('./constants.class');
 const Game = require('./game.class');
 const Rooms = require('./room.class');
 const Helper = require('./helper.class');
@@ -64,12 +64,13 @@ class Receiver extends Reserved {
   }
 
   joinQueue() {
-    if (this.queue.length === 0) {
-      this.queue.push(this.user);
-    } else {
-      if (this.inQueue() === false) {
+    if (this.inQueue() === false) {
+      if (this.queue.length === 0) {
+        this.queue.push(this.user);
+      } else {
         this.queue.shift().then((queuedUser) => {
           try {
+            this.gameCount += 1;
             this.rooms.join(`game-room-${this.gameCount}`);
             this.rooms.socketJoin(
               this.io.sockets.sockets.get(queuedUser.socketId),
@@ -77,17 +78,20 @@ class Receiver extends Reserved {
             );
             this.games.set(
               this.gameCount,
-              INITIAL_GAME_STATE(this.user, queuedUser, this.gameCount)
+              Constants.INITIAL_GAME_STATE(
+                this.user,
+                queuedUser,
+                this.gameCount
+              )
             );
             Helper.updateActiveGames(
               this.gameCount,
               this.user.username,
               queuedUser.username
             );
-
             this.sender.roomsAll(
               'start-game',
-              INITIAL_GAME_STATE(this.user, queuedUser, this.gameCount),
+              Helper.initialGameState(this.user.username, queuedUser.username),
               `game-room-${this.gameCount}`
             );
             this.deleteGlobal(this.user.username);
@@ -97,7 +101,6 @@ class Receiver extends Reserved {
               serialize(this.global),
               'public-chat'
             );
-            this.gameCount += 1;
           } catch {
             this.games.delete(this.gameCount);
             this.sender.roomsAll(
@@ -113,6 +116,8 @@ class Receiver extends Reserved {
           }
         });
       }
+    } else {
+      this.sender.basic('already-in-queue', {});
     }
   }
 

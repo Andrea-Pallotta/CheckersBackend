@@ -1,4 +1,5 @@
 const DB = require('better-sqlite3-helper');
+const Constants = require('./constants.class');
 const User = require('./user.class');
 
 class Helper {
@@ -10,6 +11,14 @@ class Helper {
     usernames.forEach((username) => {
       this.updateActiveGame(username, activeGame);
     });
+  }
+
+  static initialGameState(user1, user2) {
+    return Constants.INITIAL_GAME_STATE(
+      User.fromJSON(this.getUser('username', user1)),
+      User.fromJSON(this.getUser('username', user2)),
+      this.gameCount
+    );
   }
 
   static verifyUser(user) {
@@ -61,6 +70,11 @@ class Helper {
         ['activeGame']
       );
     });
+  }
+
+  static updateAndGetUser(socketId, username) {
+    DB().update('users', { socketId }, ['username = ?', username]);
+    return this.getUser('username', username);
   }
 }
 

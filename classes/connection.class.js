@@ -3,6 +3,7 @@ const Receiver = require('./receiver.class');
 const Reserved = require('./reserved.class');
 const User = require('./user.class');
 const Constants = require('./constants.class');
+const Helper = require('./helper.class');
 
 class Connection {
   constructor(
@@ -53,6 +54,9 @@ class Connection {
       this.user,
       this.games
     );
+
+    this.reserved.addSocket(this.user.username);
+    this.sender.basic('connection', this.user.socketId);
   }
 
   setUser(username) {
@@ -62,7 +66,7 @@ class Connection {
 
 const createConnection = (io) => {
   io.on('connection', (socket) => {
-    const connection = new Connection(
+    new Connection(
       io,
       socket,
       Constants.SOCKETS,
@@ -71,10 +75,8 @@ const createConnection = (io) => {
       Constants.QUEUE,
       Constants.GAMECOUNT,
       Constants.GAMES,
-      new User(socket.handshake.query.username, socket.id)
+      Helper.updateAndGetUser(socket.id, socket.handshake.query.username)
     );
-    connection.reserved.addSocket(socket.handshake.query.username);
-    connection.sender.basic('connection', socket.id);
   });
 };
 

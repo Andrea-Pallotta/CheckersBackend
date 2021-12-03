@@ -37,11 +37,11 @@ io.use(async (socket, next) => {
       tokenUse: 'access',
       clientId: socket.handshake.auth.token.payload.client_id,
     });
+    next();
     await verifier.verify(socket.handshake.auth.token.jwtToken);
   } catch (err) {
     console.log(`validation failed ${err}`);
   }
-  next();
 });
 
 createConnection(io);

@@ -3,7 +3,6 @@ class User {
     username,
     socketId,
     email,
-    accessToken,
     wins,
     draws,
     losses,
@@ -14,7 +13,6 @@ class User {
     this.username = username;
     this.socketId = socketId;
     this.email = email;
-    this.accessToken = accessToken;
     this.wins = wins;
     this.draws = draws;
     this.losses = losses;

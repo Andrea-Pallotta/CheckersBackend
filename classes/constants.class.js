@@ -19,7 +19,7 @@ const GAMECOUNT = 0;
 
 const INITIAL_GAME_STATE = (player1, player2, roomId) => {
   return new Game(
-    this.NEW_GAME_BOARD,
+    NEW_GAME_BOARD,
     player1,
     player2,
     1,
