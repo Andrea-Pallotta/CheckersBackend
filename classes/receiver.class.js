@@ -2,10 +2,10 @@ const { serialize } = require('../utilities/utilities');
 const Sender = require('./sender.class');
 const Reserved = require('./reserved.class');
 const Message = require('./message.class');
-const Constants = require('./constants.class');
 const Game = require('./game.class');
 const Rooms = require('./room.class');
 const Helper = require('./helper.class');
+const { NEW_GAME_BOARD } = require('./constants.class');
 
 class Receiver extends Reserved {
   constructor(
@@ -78,10 +78,16 @@ class Receiver extends Reserved {
             );
             this.games.set(
               this.gameCount,
-              Constants.INITIAL_GAME_STATE(
-                this.user,
+              new Game(
+                NEW_GAME_BOARD,
                 queuedUser,
-                this.gameCount
+                this.user,
+                1,
+                { x: undefined, y: undefined },
+                this.gameCount,
+                `It's ${queuedUser.username} turn.`,
+                false,
+                undefined
               )
             );
             Helper.updateActiveGames(
@@ -91,10 +97,16 @@ class Receiver extends Reserved {
             );
             this.sender.roomsAll(
               'start-game',
-              Helper.initialGameState(
-                this.user.username,
-                queuedUser.username,
-                this.gameCount
+              new Game(
+                NEW_GAME_BOARD,
+                queuedUser,
+                this.user,
+                1,
+                { x: undefined, y: undefined },
+                this.gameCount,
+                `It's ${queuedUser.username} turn.`,
+                false,
+                undefined
               ),
               `game-room-${this.gameCount}`
             );
@@ -105,7 +117,8 @@ class Receiver extends Reserved {
               serialize(this.global),
               'public-chat'
             );
-          } catch {
+          } catch (err) {
+            console.log(err);
             this.games.delete(this.gameCount);
             this.sender.roomsAll(
               'queue-failed',
@@ -155,7 +168,7 @@ class Receiver extends Reserved {
         winner.score += 50;
 
         game.winner = winner;
-        game.message = `${winner.username} Won the Game!`;
+        game.message = `${winner.username} won the Game!`;
         Helper.clearActiveGame(game.player1.username, game.player2.username);
         this.games.delete(game.roomId);
         game.updateScores();
@@ -176,19 +189,32 @@ class Receiver extends Reserved {
           this.games.set(game.roomId, game);
         }
       }
+    } else {
+      game.turn = game.turn === 1 ? 2 : 1;
+      game.message = `It's ${
+        game.turn === 1 ? game.player1.username : game.player2.username
+      }'s turn`;
+      this.games.set(game.roomId, game);
     }
     this.sender.roomsAll('send-move', game, `game-room-${game.roomId}`);
   }
 
   forfeitGame(gameState) {
-    gameState.message = `${gameState.winner.username} won the game!`;
-    gameState.gameEnded = true;
-    this.sender.roomsAll(
-      'game-forfeited',
-      gameState,
-      `game-room-${gameState.roomId}`
-    );
-    this.rooms.deleteRoom(`game-room-${gameState.gameId}`);
+    const game = Game.fromJSON(gameState);
+    game.winner =
+      game.player1.username === this.user.username
+        ? game.player2
+        : game.player1;
+    game.message = `${game.winner.username} won the game!`;
+    game.gameEnded = true;
+
+    Helper.clearActiveGame(game.player1.username, game.player2.username);
+    this.games.delete(game.roomId);
+    game.updateScores();
+    game.getPlayers().forEach((user) => {
+      Helper.updateScore(user);
+    });
+    this.sender.roomsAll('send-move', game, `game-room-${game.roomId}`);
   }
 
   onDisconnecting() {

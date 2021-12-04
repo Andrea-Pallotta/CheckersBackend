@@ -2,7 +2,14 @@ const Sender = require('./sender.class');
 const Receiver = require('./receiver.class');
 const Reserved = require('./reserved.class');
 const User = require('./user.class');
-const Constants = require('./constants.class');
+const {
+  SOCKETS,
+  GLOBAL,
+  MESSAGES,
+  QUEUE,
+  GAMECOUNT,
+  GAMES,
+} = require('./constants.class');
 const Helper = require('./helper.class');
 
 class Connection {
@@ -65,19 +72,23 @@ class Connection {
 }
 
 const createConnection = (io) => {
-  io.on('connection', (socket) => {
-    new Connection(
-      io,
-      socket,
-      Constants.SOCKETS,
-      Constants.GLOBAL,
-      Constants.MESSAGES,
-      Constants.QUEUE,
-      Constants.GAMECOUNT,
-      Constants.GAMES,
-      Helper.updateAndGetUser(socket.id, socket.handshake.query.username)
-    );
-  });
+  try {
+    io.on('connection', (socket) => {
+      new Connection(
+        io,
+        socket,
+        SOCKETS,
+        GLOBAL,
+        MESSAGES,
+        QUEUE,
+        GAMECOUNT,
+        GAMES,
+        Helper.updateAndGetUser(socket.id, socket.handshake.query.username)
+      );
+    });
+  } catch (err) {
+    throw Error('failed to create socket connection');
+  }
 };
 
 module.exports = { createConnection };
