@@ -122,7 +122,7 @@ class Receiver extends Reserved {
   }
 
   gameMessage(message, roomId) {
-    this.sender.roomsNoSender(
+    this.sender.roomsAll(
       'send-game-message',
       new Message(this.user.username, message),
       `game-room-${roomId}`
