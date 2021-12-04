@@ -91,7 +91,11 @@ class Receiver extends Reserved {
             );
             this.sender.roomsAll(
               'start-game',
-              Helper.initialGameState(this.user.username, queuedUser.username),
+              Helper.initialGameState(
+                this.user.username,
+                queuedUser.username,
+                this.gameCount
+              ),
               `game-room-${this.gameCount}`
             );
             this.deleteGlobal(this.user.username);
@@ -146,19 +150,31 @@ class Receiver extends Reserved {
       game.checkWin();
 
       if (game.gameEnded === true) {
-        game.gameEnded = true;
-        game.winner = game.turn;
-        game.message = `${
-          game.turn === 1 ? game.player1.username : game.player2.username
-        } won the game!`;
-        this.games.delete(game.roomId);
+        const winner = this.user;
+        winner.wins += 1;
+        winner.score += 50;
+
+        game.winner = winner;
+        game.message = `${winner.username} Won the Game!`;
         Helper.clearActiveGame(game.player1.username, game.player2.username);
+        this.games.delete(game.roomId);
+        game.updateScores();
+        game.getPlayers().forEach((user) => {
+          Helper.updateScore(user);
+        });
       } else {
-        game.turn = game.turn === 1 ? 2 : 1;
-        game.message = `Current turn: ${
-          game.turn === 1 ? game.player1.username : game.player2.username
-        }`;
-        this.games.set(game.roomId, game);
+        if (game.checkDraw() === true) {
+          game.message = `Game Ended with a Draw!`;
+          game.gameEnded = true;
+          Helper.clearActiveGame(game.player1.username, game.player2.username);
+          this.games.delete(game.roomId);
+        } else {
+          game.turn = game.turn === 1 ? 2 : 1;
+          game.message = `It's ${
+            game.turn === 1 ? game.player1.username : game.player2.username
+          } turn`;
+          this.games.set(game.roomId, game);
+        }
       }
     }
     this.sender.roomsAll('send-move', game, `game-room-${game.roomId}`);

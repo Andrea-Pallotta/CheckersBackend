@@ -13,11 +13,11 @@ class Helper {
     });
   }
 
-  static initialGameState(user1, user2) {
+  static initialGameState(user1, user2, gameCount) {
     return Constants.INITIAL_GAME_STATE(
       User.fromJSON(this.getUser('username', user1)),
       User.fromJSON(this.getUser('username', user2)),
-      this.gameCount
+      gameCount
     );
   }
 
@@ -75,6 +75,15 @@ class Helper {
   static updateAndGetUser(socketId, username) {
     DB().update('users', { socketId }, ['username = ?', username]);
     return this.getUser('username', username);
+  }
+
+  static updateScore(user) {
+    DB().update(
+      'users',
+      user,
+      ['username = ?', user.username],
+      ['wins', 'draws', 'losses', 'score']
+    );
   }
 }
 
