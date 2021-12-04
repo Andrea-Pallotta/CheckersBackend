@@ -7,7 +7,7 @@ CREATE TABLE 'users' (
     wins INT DEFAULT 0,
     draws INT DEFAULT 0,
     losses INT DEFAULT 0,
-    score INT DEFAULT 0,
+    score INT DEFAULT 1000,
     activeGame STRING
 );
 
