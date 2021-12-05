@@ -1,7 +1,6 @@
 const Sender = require('./sender.class');
 const Receiver = require('./receiver.class');
 const Reserved = require('./reserved.class');
-const User = require('./user.class');
 const {
   SOCKETS,
   GLOBAL,
@@ -12,7 +11,25 @@ const {
 } = require('./constants.class');
 const Helper = require('./helper.class');
 
+/**
+ * Class that instantiates the Socket.io connection.
+ *
+ * @class Connection
+ */
 class Connection {
+  /**
+   * Creates an instance of Connection.
+   * @param {*} io
+   * @param {*} socket
+   * @param {*} sockets
+   * @param {*} global
+   * @param {*} messages
+   * @param {*} queue
+   * @param {*} gameCount
+   * @param {*} games
+   * @param {*} user
+   * @memberof Connection
+   */
   constructor(
     io,
     socket,
@@ -65,12 +82,13 @@ class Connection {
     this.reserved.addSocket(this.user.username);
     this.sender.basic('connection', this.user.socketId);
   }
-
-  setUser(username) {
-    this.user = new User(username, this.socket.id);
-  }
 }
 
+/**
+ * Create a new Connection instance when a client connects.
+ *
+ * @param {*} io
+ */
 const createConnection = (io) => {
   try {
     io.on('connection', (socket) => {

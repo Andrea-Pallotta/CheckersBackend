@@ -1,5 +1,8 @@
 const DB = require('better-sqlite3-helper');
 
+/**
+ * Create Sqlite3 instance with custom options.
+ */
 DB({
   path: './database/connect4.db',
   readonly: false,

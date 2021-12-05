@@ -1,6 +1,10 @@
 const { CognitoJwtVerifier } = require('aws-jwt-verify');
 const Response = require('../classes/response.class');
 
+/**
+ * Extract Token from HTTP header
+ * @param  {JSON} auth
+ */
 const extractToken = (auth) => {
   const split = auth.split(' ');
   const type = split[0];
@@ -13,6 +17,12 @@ const extractToken = (auth) => {
   return null;
 };
 
+/**
+ * Middleware to validate JWT from frontend
+ * @param  {JSON} req
+ * @param  {Object} res
+ * @param  {Function} next
+ */
 const jwtAuth = async (req, res, next) => {
   res.setHeader('Content-Type', 'application/json');
   try {

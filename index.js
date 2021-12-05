@@ -1,6 +1,6 @@
+require('./database/init.db');
 const express = require('express');
 const cors = require('cors');
-require('./database/init.db');
 
 const config = require('./configs/configs')();
 const { createConnection } = require('./classes/connection.class');
@@ -17,11 +17,23 @@ app.use(express.urlencoded({ extended: true }));
 app.use(jwtAuth);
 app.use('/api', routes);
 
+/**
+ * Create express.js instance and run it.
+ * When the server starts, remove all active games.
+ * @param  {number} config.app.port
+ * @param  {string} config.app.host
+ */
 const server = app.listen(config.app.port, config.app.host, () => {
   Helper.clearActiveGames();
   console.log(`${config.app.host} running on port ${config.app.port}`);
 });
 
+/**
+ * Create socket.io instance with custom JSON parser.
+ * @param  {socket.io} io
+ * @param  {express} server
+ * @param  {require('socket.io-msgpack-parser'} parser
+ */
 const io = require('socket.io')(server, {
   parser: require('socket.io-msgpack-parser'),
   cors: {
@@ -30,6 +42,11 @@ const io = require('socket.io')(server, {
   },
 });
 
+/**
+ * Socket.io middleware to add Cognito JWT validation
+ * @param  {socket.io} socket
+ * @param  {Function} next
+ */
 io.use(async (socket, next) => {
   try {
     const verifier = CognitoJwtVerifier.create({
@@ -37,11 +54,11 @@ io.use(async (socket, next) => {
       tokenUse: 'access',
       clientId: socket.handshake.auth.token.payload.client_id,
     });
-    next();
     await verifier.verify(socket.handshake.auth.token.jwtToken);
   } catch (err) {
     console.log(`validation failed ${err}`);
   }
+  next();
 });
 
 createConnection(io);

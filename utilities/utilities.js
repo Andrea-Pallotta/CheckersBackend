@@ -1,17 +1,11 @@
-const addToGlobal = (map, object) => {
-  map.set(object, 1);
-};
-
-const removeFromGlobal = (map, id) => {
-  map.delete(id);
-};
-
+/**
+ * Serialize a Map's keys
+ * @param  {Map} map
+ */
 const serialize = (map) => {
   return [...map.keys()];
 };
 
 module.exports = {
-  addToGlobal,
-  removeFromGlobal,
   serialize,
 };

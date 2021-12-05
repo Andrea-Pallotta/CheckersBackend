@@ -1,3 +1,6 @@
+/**
+ * Validator payload for username-email duplet
+ */
 const insertUser = {
   type: 'object',
   properties: {
@@ -8,6 +11,9 @@ const insertUser = {
   additionalProperties: false,
 };
 
+/**
+ * Validator payload for username singleton object
+ */
 const getUser = {
   type: 'object',
   properties: {

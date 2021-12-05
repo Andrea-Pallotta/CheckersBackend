@@ -4,6 +4,11 @@ const Response = require('../classes/response.class');
 const Helper = require('../classes/helper.class');
 
 module.exports = {
+  /**
+   * Get user from database and send it to the frontend
+   * @param  {JSON} req
+   * @param  {Object} res
+   */
   getUser: async (req, res) => {
     if (validation.validate(validationSchemas.getUser, req.query)) {
       const user = Helper.getUser(req.query.username);
@@ -15,6 +20,12 @@ module.exports = {
     return res.status(400).send(Response.E400());
   },
 
+  /**
+   * Insert user to the database and
+   * send it to the frontend if insert was successful
+   * @param  {JSON} req
+   * @param  {Object} res
+   */
   insertUser: async (req, res) => {
     if (validation.validate(validationSchemas.insertUser, req.body)) {
       const username = req.body.username;
