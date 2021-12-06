@@ -13,11 +13,11 @@ module.exports = {
     if (validation.validate(validationSchemas.getUser, req.query)) {
       const user = Helper.getUser(req.query.username);
       if (user) {
-        return res.status(200).send(Response.Success(user));
+        return res.status(200).json(Response.Success(user));
       }
-      return res.status(404).send(Response.E404('User not found'));
+      return res.status(404).json(Response.E404('User not found'));
     }
-    return res.status(400).send(Response.E400());
+    return res.status(400).json(Response.E400());
   },
 
   /**
@@ -34,15 +34,15 @@ module.exports = {
       const user = Helper.getUser('username', username);
 
       if (user) {
-        return res.status(200).send(Response.Success(user));
+        return res.status(200).json(Response.Success(user));
       }
 
       const newUser = Helper.insertAndRetrieveUser(username, email);
       if (newUser) {
-        return res.status(200).send(Response.Success(user));
+        return res.status(200).json(Response.Success(user));
       }
-      return res.status(500).send(Response.E500('Error creating account'));
+      return res.status(500).json(Response.E500('Error creating account'));
     }
-    return res.status(400).send(Response.E400());
+    return res.status(400).json(Response.E400());
   },
 };

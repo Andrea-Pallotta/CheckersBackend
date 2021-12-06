@@ -17,7 +17,7 @@ const extractToken = (auth) => {
   return null;
 };
 
-const flagged = ['/', '/checks/health', '/checks/health/', '/favicon.ico'];
+const flagged = ['/', '/checks/health', '/favicon.ico'];
 /**
  * Middleware to validate JWT from frontend
  * @param  {JSON} req
@@ -27,19 +27,23 @@ const flagged = ['/', '/checks/health', '/checks/health/', '/favicon.ico'];
 const jwtAuth = async (req, res, next) => {
   res.setHeader('Content-Type', 'application/json');
   if (flagged.includes(req.path)) return next();
-  try {
-    const token = extractToken(req.headers.authorization);
-    const verifier = CognitoJwtVerifier.create({
-      userPoolId: token.payload.iss.split('/')[3],
-      tokenUse: 'access',
-      clientId: token.payload.client_id,
-    });
-    await verifier.verify(token.jwtToken);
-  } catch (err) {
-    console.log(`validation failed ${err}`);
-    return res.status(401).send(Response.E401);
+  if (!req.headers.authorization) return res.status(401).json(Response.E401);
+  else {
+    console.log('valid');
+    try {
+      const token = extractToken(req.headers.authorization);
+      const verifier = CognitoJwtVerifier.create({
+        userPoolId: token.payload.iss.split('/')[3],
+        tokenUse: 'access',
+        clientId: token.payload.client_id,
+      });
+      await verifier.verify(token.jwtToken);
+    } catch (err) {
+      console.log(`validation failed ${err}`);
+      return res.status(401).json(Response.E401);
+    }
+    next();
   }
-  next();
 };
 
 module.exports = jwtAuth;
