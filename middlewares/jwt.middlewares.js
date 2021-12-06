@@ -17,7 +17,7 @@ const extractToken = (auth) => {
   return null;
 };
 
-const flagged = ['/', '/health/'];
+const flagged = ['/', '/health/', '/favicon.ico'];
 /**
  * Middleware to validate JWT from frontend
  * @param  {JSON} req
