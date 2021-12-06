@@ -17,6 +17,16 @@ app.use(express.urlencoded({ extended: true }));
 app.use(jwtAuth);
 app.use('/api', routes);
 
+app.get('/', (req, res) => {
+  const data = {
+    uptime: process.uptime(),
+    message: 'Ok',
+    date: new Date(),
+  };
+
+  res.status(200).send(data);
+});
+
 /**
  * Create express.js instance and run it.
  * When the server starts, remove all active games.

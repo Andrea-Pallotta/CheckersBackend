@@ -33,6 +33,19 @@ class Reserved {
     this.deleteSocket(username);
   }
 
+  async removeFromQueue() {
+    const temp = [];
+    for (let i = 0; i < this.queue.length; i++) {
+      const user = await this.queue.shift();
+      if (user.username !== this.user.username) {
+        temp.push(user);
+      }
+    }
+    if (temp.length > 0) {
+      this.queue.push(temp);
+    }
+  }
+
   /**
    * Delete socket by username
    *

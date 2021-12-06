@@ -15,6 +15,7 @@ class User {
    * @param {*} score
    * @param {*} id
    * @param {*} activeGame
+   * @param {*} state
    * @memberof User
    */
   constructor(
@@ -26,7 +27,8 @@ class User {
     losses,
     score,
     id,
-    activeGame
+    activeGame,
+    state
   ) {
     this.username = username;
     this.socketId = socketId;
@@ -37,6 +39,7 @@ class User {
     this.score = score;
     this.id = id;
     this.activeGame = activeGame;
+    this.state = state;
   }
 
   /**
@@ -76,6 +79,33 @@ class User {
    */
   setId(socketId) {
     this.socketId = socketId;
+  }
+
+  /**
+   * Set user's state as online.
+   *
+   * @memberof User
+   */
+  setOnline() {
+    this.state = 'Online';
+  }
+
+  /**
+   * Set user's state as in game.
+   *
+   * @memberof User
+   */
+  setInGame() {
+    this.state = 'In Game';
+  }
+
+  /**
+   * Set user's state as in queue.
+   *
+   * @memberof User
+   */
+  setInQueue() {
+    this.state = 'In Queue';
   }
 
   /**

@@ -17,6 +17,7 @@ const extractToken = (auth) => {
   return null;
 };
 
+const flagged = ['/', '/health/'];
 /**
  * Middleware to validate JWT from frontend
  * @param  {JSON} req
@@ -25,6 +26,7 @@ const extractToken = (auth) => {
  */
 const jwtAuth = async (req, res, next) => {
   res.setHeader('Content-Type', 'application/json');
+  if (flagged.includes(req.path)) return next();
   try {
     const token = extractToken(req.headers.authorization);
     const verifier = CognitoJwtVerifier.create({

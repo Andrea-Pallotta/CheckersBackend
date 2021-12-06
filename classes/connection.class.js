@@ -50,7 +50,7 @@ class Connection {
     this.gameCount = gameCount;
     this.user = user;
     this.games = games;
-
+    
     this.reserved = new Reserved(
       this.io,
       this.socket,

@@ -74,6 +74,7 @@ class Receiver extends Reserved {
    */
   joinChat() {
     this.addUser(this.user);
+    this.user.setOnline();
     this.rooms.join('public-chat');
     this.sender.roomsAll(
       'joined-public-chat',
@@ -102,65 +103,61 @@ class Receiver extends Reserved {
    *
    * @memberof Receiver
    */
-  joinQueue() {
-    if (this.inQueue() === false) {
-      if (this.queue.length === 0) {
-        this.queue.push(this.user);
-      } else {
-        this.queue.shift().then((queuedUser) => {
-          try {
-            const game = new Game(
-              NEW_GAME_BOARD,
-              queuedUser,
-              this.user,
-              1,
-              { x: undefined, y: undefined },
-              this.gameCount,
-              `It's ${queuedUser.username} turn.`,
-              false,
-              undefined
-            );
-            this.gameCount += 1;
-            this.rooms.join(`game-room-${this.gameCount}`);
-            this.rooms.socketJoin(
-              this.io.sockets.sockets.get(queuedUser.socketId),
-              `game-room-${this.gameCount}`
-            );
-            this.games.set(this.gameCount, game);
-            Helper.updateActiveGames(
-              this.gameCount,
-              this.user.username,
-              queuedUser.username
-            );
-            this.sender.roomsAll(
-              'start-game',
-              game,
-              `game-room-${this.gameCount}`
-            );
-            this.deleteGlobal(this.user.username);
-            this.deleteGlobal(queuedUser.username);
-            this.sender.roomsNoSender(
-              'joined-public-chat',
-              serialize(this.global),
-              'public-chat'
-            );
-          } catch {
-            this.games.delete(this.gameCount);
-            this.sender.roomsAll(
-              'queue-failed',
-              {},
-              `game-room-${this.gameCount}`
-            );
-            this.rooms.leave(`game-room-${this.gameCount}`);
-            this.rooms.socketLeave(
-              this.io.sockets.sockets.get(queuedUser.socketId),
-              `game-room-${this.gameCount}`
-            );
-          }
-        });
-      }
+  async joinQueue() {
+    if (this.queue.length === 0) {
+      this.user.setInQueue();
+      this.queue.push(this.user);
+
+      this.sender.roomsAll(
+        'joined-public-chat',
+        serialize(this.global),
+        'public-chat'
+      );
     } else {
-      this.sender.basic('already-in-queue', {});
+      const queuedUser = await this.queue.shift();
+      try {
+        const game = new Game(
+          NEW_GAME_BOARD,
+          queuedUser,
+          this.user,
+          1,
+          { x: undefined, y: undefined },
+          this.gameCount,
+          `It's ${queuedUser.username} turn.`,
+          false,
+          undefined
+        );
+        this.gameCount += 1;
+        this.user.setInGame();
+        queuedUser.setInGame();
+        this.rooms.join(`game-room-${this.gameCount}`);
+        this.rooms.socketJoin(
+          this.io.sockets.sockets.get(queuedUser.socketId),
+          `game-room-${this.gameCount}`
+        );
+        this.games.set(this.gameCount, game);
+        Helper.updateActiveGames(
+          this.gameCount,
+          this.user.username,
+          queuedUser.username
+        );
+        this.sender.roomsAll('start-game', game, `game-room-${this.gameCount}`);
+        this.sender.roomsAll(
+          'joined-public-chat',
+          serialize(this.global),
+          'public-chat'
+        );
+      } catch {
+        this.games.delete(this.gameCount);
+        this.sender.roomsAll('queue-failed', {}, `game-room-${this.gameCount}`);
+        this.rooms.leave(`game-room-${this.gameCount}`);
+        if (this.io.sockets.sockets.get(queuedUser.socketId)) {
+          this.rooms.socketLeave(
+            this.io.sockets.sockets.get(queuedUser.socketId),
+            `game-room-${this.gameCount}`
+          );
+        }
+      }
     }
   }
 
@@ -287,6 +284,9 @@ class Receiver extends Reserved {
    */
   onDisconnecting() {
     this.rooms.leaveAll();
+    if (this.queue.length > 0) {
+      this.removeFromQueue();
+    }
   }
 
   /**
