@@ -17,7 +17,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(jwtAuth);
 app.use('/api', routes);
 
-app.get('/', (req, res) => {
+app.get('/checks/health', (req, res) => {
   const data = {
     uptime: process.uptime(),
     message: 'Ok',
