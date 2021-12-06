@@ -45,7 +45,6 @@ const server = app.listen(config.app.port, config.app.host, () => {
  * @param  {require('socket.io-msgpack-parser'} parser
  */
 const io = require('socket.io')(server, {
-  parser: require('socket.io-msgpack-parser'),
   cors: {
     origin: '*',
     methods: ['GET', 'POST'],
