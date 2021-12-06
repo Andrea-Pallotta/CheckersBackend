@@ -1,5 +1,5 @@
 /**
- * Class model for users
+ * Class model for users.
  *
  * @class User
  */
@@ -69,7 +69,7 @@ class User {
   }
 
   /**
-   * Set new SocketId.
+   * Set new socket id.
    *
    * @param {string} socketId
    * @memberof User

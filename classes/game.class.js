@@ -2,7 +2,7 @@ const Helper = require('./helper.class');
 require('../utilities/extensions');
 
 /**
- * Class model for games
+ * Class model for games.
  *
  * @class Game
  */
