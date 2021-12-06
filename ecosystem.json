@@ -4,7 +4,7 @@
         "name"          : "Connect4 API",
         "script"        : "npm",
         "args"          : "start",
-        "watch"         : true,
+        "watch"         : false,
         "cwd"           : "/home/ubuntu/opt/Connect4Backend",
         "out_file"      : "/home/ubuntu/opt/output-logs/hooker.out.log",
         "err_file"      : "/home/ubuntu/opt/error-logs/hooker.err.log",
