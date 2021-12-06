@@ -24,7 +24,7 @@ app.get('/checks/health', (req, res) => {
     date: new Date(),
   };
 
-  res.status(200).send(data);
+  res.status(200).json(data);
 });
 
 /**
