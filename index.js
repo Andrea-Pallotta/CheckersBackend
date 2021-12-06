@@ -26,6 +26,9 @@ app.get('/checks/health', (req, res) => {
 
   res.status(200).json(data);
 });
+app.use((req, res, next) => {
+  req.secure ? next() : res.redirect('https://' + req.headers.host + req.url);
+});
 
 /**
  * Create express.js instance and run it.
