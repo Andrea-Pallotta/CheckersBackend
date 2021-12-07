@@ -29,7 +29,6 @@ const jwtAuth = async (req, res, next) => {
   if (flagged.includes(req.path)) return next();
   if (!req.headers.authorization) return res.status(401).json(Response.E401);
   else {
-    console.log('valid');
     try {
       const token = extractToken(req.headers.authorization);
       const verifier = CognitoJwtVerifier.create({

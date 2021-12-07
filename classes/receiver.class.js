@@ -56,6 +56,7 @@ class Receiver extends Reserved {
     this.socket.on('join-public-chat', () => this.joinChat());
     this.socket.on('public-message', (message) => this.publicMessage(message));
     this.socket.on('join-queue', () => this.joinQueue());
+    this.socket.on('stop-queue', () => this.stopQueue());
     this.socket.on('challenge-player', (username) =>
       this.challengePlayer(username)
     );
@@ -162,13 +163,29 @@ class Receiver extends Reserved {
   }
 
   /**
+   * Remove user from queue
+   *
+   * @memberof Receiver
+   */
+  stopQueue() {
+    this.removeFromQueue();
+  }
+
+  /**
    * Send a game challenge to a user.
    *
    * @param {string} username
    * @memberof Receiver
    */
   challengePlayer(username) {
-    Helper.getUser(username);
+    const user = Helper.getUser('username', username);
+    if (user.socketId && !user.activeGame) {
+      this.sender.private(
+        user.socketId,
+        'challenge-received',
+        this.user.username
+      );
+    }
   }
 
   /**
