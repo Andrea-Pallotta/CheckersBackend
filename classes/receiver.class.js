@@ -60,6 +60,9 @@ class Receiver extends Reserved {
     this.socket.on('challenge-player', (username) =>
       this.challengePlayer(username)
     );
+    this.socket.on('challenge-response', (content) =>
+      this.challengeResponse(content.username, content.status)
+    );
     this.socket.on('game-message', (content) =>
       this.gameMessage(content.message, content.roomId)
     );
@@ -117,37 +120,7 @@ class Receiver extends Reserved {
     } else {
       const queuedUser = await this.queue.shift();
       try {
-        const game = new Game(
-          NEW_GAME_BOARD,
-          queuedUser,
-          this.user,
-          1,
-          { x: undefined, y: undefined },
-          this.gameCount,
-          `It's ${queuedUser.username} turn.`,
-          false,
-          undefined
-        );
-        this.gameCount += 1;
-        this.user.setInGame();
-        queuedUser.setInGame();
-        this.rooms.join(`game-room-${this.gameCount}`);
-        this.rooms.socketJoin(
-          this.io.sockets.sockets.get(queuedUser.socketId),
-          `game-room-${this.gameCount}`
-        );
-        this.games.set(this.gameCount, game);
-        Helper.updateActiveGames(
-          this.gameCount,
-          this.user.username,
-          queuedUser.username
-        );
-        this.sender.roomsAll('start-game', game, `game-room-${this.gameCount}`);
-        this.sender.roomsAll(
-          'joined-public-chat',
-          serialize(this.global),
-          'public-chat'
-        );
+        this.createGame(queuedUser);
       } catch {
         this.games.delete(this.gameCount);
         this.sender.roomsAll('queue-failed', {}, `game-room-${this.gameCount}`);
@@ -183,6 +156,27 @@ class Receiver extends Reserved {
       this.sender.private(
         user.socketId,
         'challenge-received',
+        this.user.username
+      );
+    }
+  }
+
+  /**
+   * Receive challenge response from client. Start game if user accepted.
+   * Emit decline event if user declined.
+   *
+   * @param {*} username
+   * @param {*} status
+   * @memberof Receiver
+   */
+  challengeResponse(username, status) {
+    const user = Helper.getUser('username', username);
+    if (status === 'accept') {
+      this.createGame(user);
+    } else if (status === 'decline') {
+      this.sender.private(
+        user.socketId,
+        'challenge-declined',
         this.user.username
       );
     }
@@ -267,7 +261,7 @@ class Receiver extends Reserved {
       }'s turn`;
       this.games.set(game.roomId, game);
     }
-    this.sender.roomsAll('send-move', game, `game-room-${game.roomId}`);
+    this.sender.roomsAll('update-game', game, `game-room-${game.roomId}`);
   }
 
   /**
@@ -318,6 +312,42 @@ class Receiver extends Reserved {
       'public-chat'
     );
     this.socket.disconnect();
+  }
+
+  /**
+   * Create a new game state and emit to the two players.
+   *
+   * @param {*} user
+   * @memberof Receiver
+   */
+  createGame(user) {
+    this.gameCount += 1;
+    const game = new Game(
+      NEW_GAME_BOARD,
+      user,
+      this.user,
+      1,
+      { x: undefined, y: undefined },
+      this.gameCount,
+      `It's ${user.username} turn.`,
+      false,
+      undefined
+    );
+    this.user.setInGame();
+    user.setInGame();
+    this.rooms.join(`game-room-${this.gameCount}`);
+    this.rooms.socketJoin(
+      this.io.sockets.sockets.get(user.socketId),
+      `game-room-${this.gameCount}`
+    );
+    this.games.set(this.gameCount, game);
+    Helper.updateActiveGames(this.gameCount, this.user.username, user.username);
+    this.sender.roomsAll('start-game', game, `game-room-${this.gameCount}`);
+    this.sender.roomsAll(
+      'joined-public-chat',
+      serialize(this.global),
+      'public-chat'
+    );
   }
 }
 
