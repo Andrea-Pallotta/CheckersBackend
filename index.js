@@ -46,7 +46,7 @@ const server = app.listen(config.app.port, config.app.host, () => {
   Helper.clearActiveGames();
   console.log(`${config.app.host} running on port ${config.app.port}`);
 });
-
+server.keepAliveTimeout = 65000;
 /**
  * Create socket.io instance with custom JSON parser.
  * @param  {socket.io} io
