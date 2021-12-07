@@ -89,9 +89,6 @@ This WebSockets API was created as the final project for ISTE-442. It's responsi
   - The load balancer can distribute the traffic over several machines, improving efficiency, risk-free deployment time, and scalability.
 - `JWT` validation is done by both the websockets (right before the socket connection is established) and the ExpressJS server (on every endpoint except the `api.connectfour.link/checks/health` endpoint used together with the nginx server endpoint (`api.connectfour.link/index.html`) by the Load Balancer to check the health of the EC2 instance).
 - This detailed `README.md` file!
-- High `Lighthouse` rating
-
-![lighthouse rating](https://github.com/Andrea-Pallotta/Connect4Frontend/blob/main/performance.PNG)
 
 ## What to improve
 
