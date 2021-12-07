@@ -13,9 +13,10 @@ This WebSockets API was created as the final project for ISTE-442. It's responsi
 # How to configure and run the server
 
 1. Clone the project locally `git clone git@github.com:Andrea-Pallotta/Connect4Backend.git`.
-2. To run the code in your local environment, execute `npm run start:dev`.
-3. You won't be able to run `npm start` because it's solely used for the server on the EC2 instance.
-   - You can modify the IP used by `npm start` in the file [./configs/configs.js](configs/configs.js#L6).
+2. `cd Connect4Backend`.
+3. To run the code in your local environment, execute `npm run start:dev`.
+4. You won't be able to run `npm start` because it's solely used for the server on the EC2 instance.
+   - You can modify the IP used by `npm start` in the file [./configs/configs.js](https://github.com/Andrea-Pallotta/Connect4Backend/blob/main/configs/configs.js#L6).
    - If you modify the IP, make sure to modify the `EC2` IP in the frontend at [Connect4Frontend/connect4/src/components/API/endpoints.js](https://github.com/Andrea-Pallotta/Connect4Frontend/blob/main/connect4/src/components/API/endpoints.js#L5).
    - It may create problems if not done correctly. Not modifying IP addresses is recommended!
 
@@ -24,7 +25,7 @@ This WebSockets API was created as the final project for ISTE-442. It's responsi
 - The `./.github/workflows/ci-cd.yml` contains all the CI/CD jobs.
 - The server is deployed on the EC2 when there is a `pull_request` to `[ main ]`.
 - The pipelines use AWS CodeDeploy to handle the logic behind CD.
-- On the EC2 instance, AWS CodeDeploy uses the ecosystem.json to start a pm2 daemon.
+- On the EC2 instance, AWS CodeDeploy uses the `appspec.yml` tecosystem.json to start the `ecosystem.json` through pm2.
 - The Load Balancer starts hitting the health check endpoint. After 7 successful requests (response code `200`), the server will be available.
 - A nginx instance runs on the EC2 on port 80 and acts as a proxy (or reverse proxy) for HTTP requests on port 80. Required by the Load Balancer.
 
@@ -46,39 +47,64 @@ This WebSockets API was created as the final project for ISTE-442. It's responsi
   - If the SQLite3 database files are deleted, it autogenerates the tables (not configured to repopulate data).
 - ExpressJS requests are validated using aJv and custom payloads.
 
+## Testing
+
+- For both the REST API and the WebSockets API, automated testing is done through Postman (their WS feature is still in beta).
+- Use of NJSScan as a static analyzer to find vulnerabilities and errors in the code.
+- Use of ESLint to enforce a coding style and practices (AirBnB styleguide).
+
 ## Code Structure
 
 - The code is divided into classes to respect the "Separation of Concerns" Design Principle.
 - Extensive use of `ES6 Classes` to handle same data types instead of using plain JSON Objects.
-- Environment variables are grouped in a JSON object to be reused throughout the application.
-- The code contains one Array property extension.
-- Maps/Sets are serialized with a custom function before being sent to the frontend via WS.
+  - There are four main classes:
+    - `Connection`: Handles creating the socket connection and all the other classes needed by the user.
+    - `Receiver`: Handles all the events that the server receives from the frontend.
+    - `Sender`: A group of generic functions for different emit (basic emit to user, private emits to a different socket, emit to one or more rooms, broadcast, etc.).
+    - `Rooms`: Handles socket rooms, adding and removing users, deleting rooms, etc.
+    - `Reserved`: a super class extended by other classes that handles the logic and the in-memory objects. Only used by extended classes, no external imports.
+  - Environment variables are grouped in a JSON object to be reused throughout the application.
+- `Maps`/`Sets` are serialized with a custom function before being sent to the frontend via WS.
 
 ## HTTPS/WSS
 
 - The server itself runs on `HTTP` and `WS`.
 - An AWS Application Load Balancer (`ALB`) is attached to the EC2 instance on which the server runs and acts as a "Man in the Middle".
   - When the ReactJS frontend hosted on AWS Amplify sends a secure (`HTTPS/WSS`) request to the server, the ALB
-    redirects the requests to port `8081` as unsecure requests. This process is called `SSL Termination`.
-  - Only the connection between the frontend and the ALB uses SSL/TLS.
+    redirects the requests to port `8081` as unsecure requests. This process is called `SSL/TLS Termination`.
+  - Only the connection between the frontend and the ALB uses TLS.
 - The ALB is not scalable because it only uses free features.
 
-# Project Dependencies
+## What I think was well done
 
-## Dependencies
+- Use of both `WebSockets` and REST API without coupling (they cannot interact with each others but they can use common functions).
+- Extensive use of `ES6 classes` for code structure with low coupling.
+- Use of a `SQLite3` database with a migration file. In this way the data in the database is not accessible but can still be migrated to other systems (i.e. using `Terraform` or `Ansible`).
+- Use of `whitelisting/blacklisting` for SQL parameterized queries.
+  - Each query only allows the system the modify the specified fields.
+  - Combined with anonymous parameters, it makes the possibility to execute remote code via SQL injections very very low.
+- Full implementation of `HTTPS` via AWS `Application Load Balancer`.
+  - Very hard to setup but secures the system from `Man in the Middle Attacks` and `packet sniffers`.
+  - Both the REST API and the WebSockets API uses a secure `TLS layer`.
+  - The load balancer can distribute the traffic over several machines, improving efficiency, risk-free deployment time, and scalability.
+- `JWT` validation is done by both the websockets (right before the socket connection is established) and the ExpressJS server (on every endpoint except the `api.connectfour.link/checks/health` endpoint used together with the nginx server endpoint (`api.connectfour.link/index.html`) by the Load Balancer to check the health of the EC2 instance).
+- This detailed `README.md` file!
+- High `Lighthouse` rating
 
-- [aws-jwt-verify](https://github.com/awslabs/aws-jwt-verify)
-- [cors](https://github.com/expressjs/cors)
-- [cross-env](https://github.com/kentcdodds/cross-env)
-- [dotenv](https://github.com/motdotla/dotenv)
-- [express](https://github.com/expressjs/express)
-- [mongoose](https://github.com/Automattic/mongoose)
-- [socket.io](https://github.com/socketio/socket.io)
-- [socket.io-msgpack-parser](https://github.com/socketio/socket.io-msgpack-parser)
-- [uuid](https://github.com/uuidjs/uuid)
-- [wait-queue](https://github.com/flarestart/wait-queue)
+![lighthouse rating](https://github.com/Andrea-Pallotta/Connect4Frontend/blob/main/performance.PNG)
 
-## Dev Dependencies
+## What to improve
 
-- [eslint](https://github.com/eslint/eslint)
-- [nodemon](https://github.com/remy/nodemon)
+- Refactor some of the business logic to improve efficiency and reduce space/time complexities.
+- If this project were to be used by several thousands users at the same time, the WS API should be split into sub-components that communicate with each others.
+- For scalability, change the architecture from a `monolite` to serverless `microservices` running on Lamda functions. This allows for multi-language development and lower coupling.
+- Add extra validation to HTTP requests. Maybe `validator.js` combined with `aJv` would do the trick.
+- Run stress-tests to see how the user handles hundreds of requests and socket connections. Make the appropriate changes after reading the benchmarks.
+- Implement a `Redis` server for HTTP caching and find an alternative for socket.io caching.
+- Run a full penetration test on the EC2 to find out network/architecture vulnerabilities.
+- Deploy on a bigger server.
+
+## Contact Info
+
+For issues, suggestions, or bugs, please open a new [GitHub issue](https://github.com/Andrea-Pallotta/Connect4Backend/issues) or contact me at [ap4534@rit.edu](mailto:ap4534@rit.edu).
+Thank you and I hope you enjoyed this Connect 4 Web App!
