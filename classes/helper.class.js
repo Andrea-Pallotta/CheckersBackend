@@ -86,6 +86,12 @@ class Helper {
     return undefined;
   }
 
+  static getUsersByLimit() {
+    return DB().query(
+      'SELECT username, score, wins, losses, draws, activeGame FROM users ORDER BY score DESC'
+    );
+  }
+
   /**
    * Delete all active games from users in database.
    *
