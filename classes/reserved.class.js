@@ -38,6 +38,7 @@ class Reserved {
     for (let i = 0; i < this.queue.length; i++) {
       const user = await this.queue.shift();
       if (user.username !== this.user.username) {
+        user.setOnline();
         temp.push(user);
       }
     }
