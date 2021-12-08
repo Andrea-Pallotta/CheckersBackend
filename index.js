@@ -9,6 +9,7 @@ const jwtAuth = require('./middlewares/jwt.middlewares');
 
 const routes = require('./routes/routes');
 const Helper = require('./classes/helper.class');
+const Game = require('./classes/game.class');
 
 const app = express();
 app.use(
@@ -79,5 +80,20 @@ io.use(async (socket, next) => {
   }
   next();
 });
-
+const player1 = {
+  username: 'player1',
+  score: 300,
+  wins: 0,
+  draws: 0,
+  losses: 0,
+};
+const player2 = {
+  username: 'player2',
+  score: 50,
+  wins: 0,
+  draws: 0,
+  losses: 0,
+};
+const game = new Game([[], []], player1, player2, 1, {}, 0, '', false, player1);
+game.updateScores();
 createConnection(io);

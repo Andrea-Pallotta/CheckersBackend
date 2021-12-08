@@ -191,18 +191,14 @@ class Game {
   calculateScore() {
     const score1 = this.player1.score;
     const score2 = this.player2.score;
+    const scoreDiff = score1 - score2;
 
-    const absScore = Math.abs(score1 - score2);
+    if (scoreDiff.inRange(undefined, 0)) return 75;
+    if (scoreDiff === 0) return 60;
+    if (scoreDiff.inRange(0, 100, true)) return 50;
+    if (scoreDiff.inRange(100, 300)) return 25;
 
-    if (absScore >= 0 && absScore < 100) {
-      return 50;
-    } else if (absScore >= 100 && absScore < 300) {
-      return 150;
-    } else if (absScore >= 300) {
-      return absScore / 2;
-    }
-
-    return 0;
+    return 15;
   }
 
   /**
@@ -219,14 +215,36 @@ class Game {
       this.player2.draws += 1;
     } else {
       if (this.winner.username === this.player1.username) {
-        this.player1.score += scoreDiff;
-        this.player1.wins += 1;
+        this.updatePlayerScore(this.player1, true, scoreDiff);
+        this.updatePlayerScore(this.player2, false, scoreDiff);
       } else {
-        this.player1.score -= scoreDiff;
-        this.player1.losses += 1;
+        this.updatePlayerScore(this.player1, false, scoreDiff);
+        this.updatePlayerScore(this.player2, true, scoreDiff);
       }
+    }
 
-      this.getPlayers().forEach((player) => Helper.updateScore(player));
+    this.getPlayers().forEach((player) => Helper.updateScore(player));
+  }
+
+  /**
+   * Update player's score and record.
+   *
+   * @param {*} player
+   * @param {*} winning
+   * @param {*} scoreDiff
+   * @memberof Game
+   */
+  updatePlayerScore(player, winning, scoreDiff) {
+    if (winning === true) {
+      player.wins += 1;
+      player.score += scoreDiff;
+    } else {
+      player.losses += 1;
+      if (player.score < scoreDiff) {
+        player.score = 0;
+      } else {
+        player.score -= scoreDiff;
+      }
     }
   }
 

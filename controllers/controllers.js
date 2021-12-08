@@ -56,10 +56,6 @@ module.exports = {
    * @param  {Object} res
    */
   getLeaderboard: async (req, res) => {
-    const users = Helper.getUsersByLimit();
-    if (users.length > 0) {
-      return res.status(200).json(Response.Success(users));
-    }
-    return res.status(404).json(Response.E404('No more users'));
+    return res.status(200).json(Response.Success(Helper.getUsersByLimit()));
   },
 };
