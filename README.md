@@ -14,8 +14,9 @@ This WebSockets API was created as the final project for ISTE-442. It's responsi
 
 1. Clone the project locally `git clone git@github.com:Andrea-Pallotta/Connect4Backend.git`.
 2. `cd Connect4Backend`.
-3. To run the code in your local environment, execute `npm run start:dev`.
-4. You won't be able to run `npm start` because it's solely used for the server on the EC2 instance.
+3. Run `npm install`.
+4. To run the code in your local environment, execute `npm run start:dev`.
+5. You won't be able to run `npm start` because it's solely used for the server on the EC2 instance.
    - You can modify the IP used by `npm start` in the file [./configs/configs.js](https://github.com/Andrea-Pallotta/Connect4Backend/blob/main/configs/configs.js#L6).
    - If you modify the IP, make sure to modify the `EC2` IP in the frontend at [Connect4Frontend/connect4/src/components/API/endpoints.js](https://github.com/Andrea-Pallotta/Connect4Frontend/blob/main/connect4/src/components/API/endpoints.js#L5).
    - It may create problems if not done correctly. Not modifying IP addresses is recommended!
