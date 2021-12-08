@@ -304,7 +304,7 @@ class Receiver extends Reserved {
     if (this.queue.length > 0) {
       this.removeFromQueue();
     }
-    
+    this.deleteGlobal(this.user.username);
   }
 
   /**
@@ -313,12 +313,12 @@ class Receiver extends Reserved {
    * @memberof Receiver
    */
   onDisconnect() {
+    this.socket.disconnect();
     this.sender.roomsAll(
       'joined-public-chat',
       serialize(this.global),
       'public-chat'
     );
-    this.socket.disconnect();
   }
 
   /**
