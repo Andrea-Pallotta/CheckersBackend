@@ -304,6 +304,7 @@ class Receiver extends Reserved {
     if (this.queue.length > 0) {
       this.removeFromQueue();
     }
+    
   }
 
   /**

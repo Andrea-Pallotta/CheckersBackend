@@ -31,6 +31,7 @@ class Reserved {
    */
   disconnect(username) {
     this.deleteSocket(username);
+    this.deleteGlobal(username);
   }
 
   async removeFromQueue() {
