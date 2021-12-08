@@ -12,6 +12,8 @@ This WebSockets API was created as the final project for ISTE-442. It's responsi
 
 # How to configure and run the server
 
+- The production server is hosted on `api.connectfour.link`.
+
 1. Clone the project locally `git clone git@github.com:Andrea-Pallotta/Connect4Backend.git`.
 2. `cd Connect4Backend`.
 3. Run `npm install`.

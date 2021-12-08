@@ -141,12 +141,12 @@ class Receiver extends Reserved {
    * @memberof Receiver
    */
   stopQueue() {
+    this.removeFromQueue();
     this.sender.roomsAll(
       'joined-public-chat',
       serialize(this.global),
       'public-chat'
     );
-    this.removeFromQueue();
   }
 
   /**
