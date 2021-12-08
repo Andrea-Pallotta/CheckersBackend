@@ -9,7 +9,6 @@ const jwtAuth = require('./middlewares/jwt.middlewares');
 
 const routes = require('./routes/routes');
 const Helper = require('./classes/helper.class');
-const Game = require('./classes/game.class');
 
 const app = express();
 app.use(
@@ -75,25 +74,8 @@ io.use(async (socket, next) => {
       clientId: socket.handshake.auth.token.payload.client_id,
     });
     await verifier.verify(socket.handshake.auth.token.jwtToken);
-  } catch (err) {
-    console.log(`validation failed ${err}`);
-  }
+    // eslint-disable-next-line no-empty
+  } catch {}
   next();
 });
-const player1 = {
-  username: 'player1',
-  score: 300,
-  wins: 0,
-  draws: 0,
-  losses: 0,
-};
-const player2 = {
-  username: 'player2',
-  score: 50,
-  wins: 0,
-  draws: 0,
-  losses: 0,
-};
-const game = new Game([[], []], player1, player2, 1, {}, 0, '', false, player1);
-game.updateScores();
 createConnection(io);

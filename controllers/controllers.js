@@ -35,13 +35,13 @@ module.exports = {
 
       const user = Helper.getUser('username', username);
 
-      if (user) {
+      if (user.username !== undefined) {
         return res.status(200).json(Response.Success(user));
       }
 
       const newUser = Helper.insertAndRetrieveUser(username, email);
       if (newUser) {
-        return res.status(200).json(Response.Success(user));
+        return res.status(200).json(Response.Success(newUser));
       }
       return res.status(500).json(Response.E500('Error creating account'));
     }

@@ -128,30 +128,6 @@ class Rooms {
   getRooms() {
     return this.socket.rooms;
   }
-
-  /**
-   * Create adapter that fires every time a room is created.
-   *
-   * @param {string} name
-   * @memberof Rooms
-   */
-  createRoomAdapter(name) {
-    this.io.of('/').adapter.on(`${name}`, (room) => {
-      console.log(`room ${room} created.`);
-    });
-  }
-
-  /**
-   * Create adapter that fires every time a socket joins the specified room.
-   *
-   * @param {string} name
-   * @memberof Rooms
-   */
-  joinRoomAdapter(name) {
-    this.io.of('/').adapter.on(`${name}`, (room, id) => {
-      console.log(`socket ${id} joined room ${room}`);
-    });
-  }
 }
 
 module.exports = Rooms;

@@ -37,8 +37,7 @@ const jwtAuth = async (req, res, next) => {
         clientId: token.payload.client_id,
       });
       await verifier.verify(token.jwtToken);
-    } catch (err) {
-      console.log(`validation failed ${err}`);
+    } catch {
       return res.status(401).json(Response.E401);
     }
     next();
