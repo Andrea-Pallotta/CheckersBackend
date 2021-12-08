@@ -141,6 +141,7 @@ class Receiver extends Reserved {
    * @memberof Receiver
    */
   stopQueue() {
+    this.user.setOnline();
     this.removeFromQueue();
     this.sender.roomsAll(
       'joined-public-chat',
